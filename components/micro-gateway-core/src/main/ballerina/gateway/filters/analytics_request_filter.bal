@@ -71,7 +71,17 @@ function doFilterResponseData(http:Response response, http:FilterContext context
     RequestResponseExecutionDTO requestResponseExecutionDTO = generateRequestResponseExecutionDataEvent(response,
         context);
     EventDTO event = generateEventFromRequestResponseExecutionDTO(requestResponseExecutionDTO);
+    printInfo(KEY_UPLOAD_TASK, "\n\n############################################");
+    var j = json.convert(event);
+    if(j is json) {
+        string s = j.toString();
+        printInfo(KEY_UPLOAD_TASK, s);
+    }
+    // json newj = <json>j;
+    // string s = newj.toString();
+    io:println(j);
     eventStream.publish(event);
+    //This is a comment made to the project.
 }
 
 function doFilterAll(http:Response response, http:FilterContext context) {
