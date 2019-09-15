@@ -30,7 +30,7 @@ map<json> openAPIs = getOpenAPIs();
 // Validation filter
 //gateway:ValidationFilter validationFilter = new(openAPIs);
 // Analytics filter
-//gateway:AnalyticsRequestFilter analyticsFilter = new;
+gateway:AnalyticsRequestFilter analyticsFilter = new;
 // Extension filter
 ExtensionFilter extensionFilter = new;
 
@@ -41,7 +41,7 @@ http:ListenerConfiguration secureServiceEndpointConfiguration = { {{>http2}},
                                                                                 position: 1
                                                                            },
                                                                            filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,throttleFilter,
-                                                                           extensionFilter]
+                                                                           analyticsFilter,extensionFilter]
                                                                        };
 
 {{>docker}}
@@ -52,7 +52,7 @@ listener gateway:APIGatewaySecureListener apiSecureListener = new(9095, secureSe
 http:ListenerConfiguration serviceEndpointConfiguration = { {{>http2}},
 
                                                                      filters:[preAuthnFilter, authorizationFilter, subscriptionFilter,throttleFilter,
-                                                                     extensionFilter]
+                                                                     analyticsFilter,extensionFilter]
                                                                  };
 
 {{>kubernetesIngress}}
