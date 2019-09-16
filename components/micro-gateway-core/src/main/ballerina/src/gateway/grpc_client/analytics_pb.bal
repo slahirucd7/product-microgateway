@@ -1,92 +1,86 @@
 import ballerina/grpc;
-import ballerina/io;
 
 public type EventServiceBlockingClient client object {
-    private grpc:Client grpcClient = new;
-    private grpc:ClientEndpointConfig config = {};
-    private string url;
 
-    function __init(string url, grpc:ClientEndpointConfig? config = ()) {
-        self.config = config ?: {};
-        self.url = url;
+    *grpc:AbstractClientEndpoint;
+
+    private grpc:Client grpcClient;
+
+    public function __init(string url, grpc:ClientConfiguration? config = ()) {
         // initialize client endpoint.
-        grpc:Client c = new;
-        c.init(self.url, self.config);
-        error? result = c.initStub("blocking", ROOT_DESCRIPTOR, getDescriptorMap());
-        if (result is error) {
-            panic result;
+        grpc:Client c = new(url, config);
+        grpc:Error? result = c.initStub(self, "blocking", ROOT_DESCRIPTOR, getDescriptorMap());
+        if (result is grpc:Error) {
+            error err = result;
+            panic err;
         } else {
             self.grpcClient = c;
         }
     }
 
-
-    remote function process(Event req, grpc:Headers? headers = ()) returns ((Event, grpc:Headers)|error) {
+    public remote function process(Event req, grpc:Headers? headers = ()) returns ([Event, grpc:Headers]|grpc:Error) {
         
-        var payload = check self.grpcClient->blockingExecute("org.wso2.grpc.eventservice.EventService/process", req, headers = headers);
+        var payload = check self.grpcClient->blockingExecute("org.wso2.grpc.eventservice.EventService/process", req, headers);
         grpc:Headers resHeaders = new;
-        any result = ();
-        (result, resHeaders) = payload;
-        var value = Event.convert(result);
+        anydata result = ();
+        [result, resHeaders] = payload;
+        var value = typedesc<Event>.constructFrom(result);
         if (value is Event) {
-            return (value, resHeaders);
+            return [value, resHeaders];
         } else {
-            error err = error("{ballerina/grpc}INTERNAL", {"message": value.reason()});
-            return err;
+            return grpc:prepareError(grpc:INTERNAL_ERROR, "Error while constructing the message", value);
         }
     }
 
-    remote function consume(Event req, grpc:Headers? headers = ()) returns (grpc:Headers|error) {
+    public remote function consume(Event req, grpc:Headers? headers = ()) returns (grpc:Headers|grpc:Error) {
         
-        var payload = check self.grpcClient->blockingExecute("org.wso2.grpc.eventservice.EventService/consume", req, headers = headers);
+        var payload = check self.grpcClient->blockingExecute("org.wso2.grpc.eventservice.EventService/consume", req, headers);
         grpc:Headers resHeaders = new;
-        (_, resHeaders) = payload;
+        [_, resHeaders] = payload;
         return resHeaders;
     }
 
 };
 
 public type EventServiceClient client object {
-    private grpc:Client grpcClient = new;
-    private grpc:ClientEndpointConfig config = {};
-    private string url;
 
-    function __init(string url, grpc:ClientEndpointConfig? config = ()) {
-        self.config = config ?: {};
-        self.url = url;
+    *grpc:AbstractClientEndpoint;
+
+    private grpc:Client grpcClient;
+
+    public function __init(string url, grpc:ClientConfiguration? config = ()) {
         // initialize client endpoint.
-        grpc:Client c = new;
-        c.init(self.url, self.config);
-        error? result = c.initStub("non-blocking", ROOT_DESCRIPTOR, getDescriptorMap());
-        if (result is error) {
-            panic result;
+        grpc:Client c = new(url, config);
+        grpc:Error? result = c.initStub(self, "non-blocking", ROOT_DESCRIPTOR, getDescriptorMap());
+        if (result is grpc:Error) {
+            error err = result;
+            panic err;
         } else {
             self.grpcClient = c;
         }
     }
 
-
-    remote function process(Event req, service msgListener, grpc:Headers? headers = ()) returns (error?) {
+    public remote function process(Event req, service msgListener, grpc:Headers? headers = ()) returns (grpc:Error?) {
         
-        return self.grpcClient->nonBlockingExecute("org.wso2.grpc.eventservice.EventService/process", req, msgListener, headers = headers);
+        return self.grpcClient->nonBlockingExecute("org.wso2.grpc.eventservice.EventService/process", req, msgListener, headers);
     }
 
-    remote function consume(Event req, service msgListener, grpc:Headers? headers = ()) returns (error?) {
+    public remote function consume(Event req, service msgListener, grpc:Headers? headers = ()) returns (grpc:Error?) {
         
-        return self.grpcClient->nonBlockingExecute("org.wso2.grpc.eventservice.EventService/consume", req, msgListener, headers = headers);
+        return self.grpcClient->nonBlockingExecute("org.wso2.grpc.eventservice.EventService/consume", req, msgListener, headers);
     }
 
 };
 
-type Empty record {
-    !...;
-};
+public type Empty record {|
+    
+|};
 
 
-type Event record {
+public type Event record {|
     string payload;
-    !...;
-};
+    
+|};
 
 
 
