@@ -5,18 +5,18 @@ EventServiceBlockingClient blockingEp = new("http://localhost:9801");
 
 
 
-public function main (string... args) {
+// public function main (string... args) {
 
-    EventServiceBlockingClient blockingEp = new("http://localhost:9801");
+//     // EventServiceBlockingClient blockingEp = new("http://localhost:9801");
 
-    Event e = {payload : "Sampleee"};
-    var response = blockingEp->consume(e);
-}
-
-
+//     // Event e = {payload : "Sampleee"};
+//     // var response = blockingEp->consume(e);
+// }
 
 
-public analyticDataPass(string analyticsString) {
+
+
+public function analyticDataPass(string analyticsString) {
         Event e = {payload : "Sampleeee"};
         var result = blockingEp->consume(e);
         io:println(result); 
