@@ -76,24 +76,33 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
 {
     RequestResponseExecutionDTO requestResponseExecutionDTO = {};
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
-
-    if (isSecured && context.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
-        AuthenticationContext authContext = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
-        requestResponseExecutionDTO.apiCreator = authContext.apiPublisher;
+    runtime:InvocationContext invocationContext = runtime:getInvocationContext();
+    if (isSecured && invocationContext.attributes.hasKey(AUTHENTICATION_CONTEXT)) {
+        AuthenticationContext authContext = <AuthenticationContext>invocationContext.attributes[AUTHENTICATION_CONTEXT];
         requestResponseExecutionDTO.metaClientType = authContext.keyType;
         requestResponseExecutionDTO.applicationConsumerKey = authContext.consumerKey;
         requestResponseExecutionDTO.userName = authContext.username;
         requestResponseExecutionDTO.applicationId = authContext.applicationId;
         requestResponseExecutionDTO.applicationName = authContext.applicationName;
-        requestResponseExecutionDTO.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
-        requestResponseExecutionDTO.apiCreator = <string>apiConfigAnnotationMap[getServiceName(context.serviceName)].publisher;
         requestResponseExecutionDTO.metaClientType = PRODUCTION_KEY_TYPE;
         requestResponseExecutionDTO.applicationConsumerKey = ANONYMOUS_CONSUMER_KEY;
         requestResponseExecutionDTO.userName = END_USER_ANONYMOUS;
         requestResponseExecutionDTO.applicationId = ANONYMOUS_APP_ID;
         requestResponseExecutionDTO.applicationName = ANONYMOUS_APP_NAME;
-        requestResponseExecutionDTO.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
+    }
+    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
+    printInfo(KEY_ANALYTICS_FILTER, apiConfigAnnotationMap.toString());
+    if (apiConfiguration is APIConfiguration) {
+        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
+            //extrcts API creator and userTenantDomain from API publisher string value
+            printDebug(KEY_ANALYTICS_FILTER, "API publisher : " + apiConfiguration.publisher);
+            requestResponseExecutionDTO.apiCreator = <string>publisherStringExtractorForAnalytics(apiConfiguration.publisher,"apiCreator");
+            printDebug(KEY_ANALYTICS_FILTER, "API creator : " + requestResponseExecutionDTO.apiCreator);
+            requestResponseExecutionDTO.userTenantDomain = <string>publisherStringExtractorForAnalytics(apiConfiguration.publisher,"userTenantDomain");
+            printDebug(KEY_ANALYTICS_FILTER, "User Tenant Domain : " + requestResponseExecutionDTO.userTenantDomain);
+        }
+        requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
     }
     requestResponseExecutionDTO.apiName = getApiName(context);
     requestResponseExecutionDTO.apiVersion = <string>apiConfigAnnotationMap[getServiceName(context.serviceName)].apiVersion;

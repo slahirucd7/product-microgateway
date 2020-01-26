@@ -94,7 +94,10 @@ public class MockAPIPublisher {
         apiJsonObj.put("name", api.getName());
         apiJsonObj.put("version", api.getVersion());
         apiJsonObj.put("context", api.getContext());
-        apiJsonObj.put("provider", api.getProvider());
+        apiJsonObj.put("provider", api.getProvider());          
+        String uuid = UUID.randomUUID().toString();
+        api.setId(uuid);
+        apiJsonObj.put("id", uuid);
 
         //todo: set tiers and swagger
         api.setSwagger(apiJsonObj.toString());

@@ -136,12 +136,24 @@ public class OpenAPICodegenUtils {
         switch (swaggerVersion) {
             case "2":
                 Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
-                swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                //sets title name similar to API name in swagger definition
+                //without this modification, two seperate rows will be added to APIM analytics dashboard tables
+                //(For APIM and Microgateway API invokes)
+                swagger.getInfo().setTitle(api.getName());
+                if (isExpand) {
+                    swagger.setVendorExtensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                }
                 return Json.pretty(swagger);
             case "3":
                 SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
                 OpenAPI openAPI = swaggerParseResult.getOpenAPI();
-                openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                //sets title similar to API name in open API definition
+                //without this modification, two seperate rows added to analytics tables
+                //(For APIM and Microgateway API invokes)
+                openAPI.getInfo().setTitle(api.getName());
+                if (isExpand) {
+                    openAPI.extensions(getExtensionMap(api, mgwEndpointConfigDTO));
+                }
                 return Yaml.pretty(openAPI);
 
             default:
@@ -197,6 +209,10 @@ public class OpenAPICodegenUtils {
         }
         if (api.getAuthorizationHeader() != null) {
             extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getAuthorizationHeader());
+        }
+        if (api.getProvider() != null) {
+            outStream.println("OpenAPICodeGenUtils : " + api.getProvider());
+            extensionsMap.put(OpenAPIConstants.API_OWNER, api.getProvider());
         }
 
         return extensionsMap;
@@ -264,6 +280,11 @@ public class OpenAPICodegenUtils {
 
         setMgwAPISecurityAndScopes(api, openAPI);
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
+        //assigns x-wso2-owner value to API provider 
+        if (openAPI.getExtensions().get(OpenAPIConstants.API_OWNER) != null) {
+            outStream.println("OpenAPI : " + openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
+            api.setProvider(openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
+        }
         try {
             if (openAPI.getExtensions().get(OpenAPIConstants.CORS) != null) {
                 api.setCorsConfiguration(objectMapper.convertValue(openAPI.getExtensions().get(OpenAPIConstants.CORS),
