@@ -623,7 +623,7 @@ public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?>
 #Gets API publisher string and provides api creator or userTenantDomain according to requiredString
 # + publisherString - API publisher string value
 # + requiredString - This could be either apiCreator or userTenantDomain
-# return - Returns requested 'string' value extracted from publisherString
+# + return - Returns requested 'string' value extracted from publisherString
 public function publisherStringExtractorForAnalytics(string publisherString ,string requiredString) returns string {
     string[] resultSet = stringutils:split(publisherString , "@");
     int resultSetLength = resultSet.length();

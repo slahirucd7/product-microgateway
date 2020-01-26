@@ -228,7 +228,7 @@ public class OpenAPICodegenUtils {
             extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getAuthorizationHeader());
         }
         if (api.getProvider() != null) {
-            outStream.println("OpenAPICodeGenUtils : " + api.getProvider());
+            // outStream.println("OpenAPICodeGenUtils : " + api.getProvider());
             extensionsMap.put(OpenAPIConstants.API_OWNER, api.getProvider());
         }
 
@@ -301,7 +301,7 @@ public class OpenAPICodegenUtils {
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
         //assigns x-wso2-owner value to API provider 
         if (openAPI.getExtensions().get(OpenAPIConstants.API_OWNER) != null) {
-            outStream.println("OpenAPI : " + openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
+            // outStream.println("OpenAPI : " + openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
             api.setProvider(openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
         }
         try {

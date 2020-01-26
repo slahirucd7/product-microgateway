@@ -106,13 +106,6 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         }
         requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
     }
-    APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
-    if (apiConfiguration is APIConfiguration) {
-        if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
-            requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
-        }
-        requestResponseExecutionDTO.apiVersion = <string>apiConfiguration.apiVersion;
-    }
     requestResponseExecutionDTO.apiName = getApiName(context);
 
     // apim analytics requires context to be '<basePath>/<version>'
