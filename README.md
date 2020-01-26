@@ -2,6 +2,7 @@
 [![Build Status](https://wso2.org/jenkins/job/products/job/product-microgateway/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/products/job/product-microgateway)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![License](https://img.shields.io/badge/slack-microgateway-blueviolet)](https://join.slack.com/t/wso2-apim/shared_invite/enQtNzEzMzk5Njc5MzM0LTgwODI3NmQ1MjI0ZDQyMGNmZGI4ZjdkZmI1ZWZmMjNkY2E0NmY3ZmExYjkxYThjNzNkOTU2NWJmYzM4YzZiOWU)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3312/badge)](https://bestpractices.coreinfrastructure.org/projects/3312)
 
 The WSO2 API Microgateway is a Cloud Native API Gateway which can be used to expose one or many microservices as APIs.
 
@@ -38,7 +39,7 @@ It also has the following characteristics that makes it a perfect fit for micros
       * [Initializing a microgateway project](#initializing-a-microgateway-project)
       * [Building the microgateway project](#building-the-microgateway-project)
       * [Running the microgateway](#running-the-microgateway)
-   * [WSO2 API Microgateway commands](#wso2-api-microgateway-commands)
+   * [WSO2 API Microgateway commands](#wso2-api-microgateway-toolkit-commands)
       * [Init](#init)
       * [Build](#build)
    * [Project Structure](#project-structure)
@@ -667,7 +668,7 @@ Enter Password for admin:
 
 Enter APIM base URL [https://localhost:9443]:
 
-You are using REST version - v0.14 of API Manager. (If you want to change this, go to <MICROGW_HOME>/conf/toolkit-config.toml)
+You are using REST version - v0.14 of API Manager. (If you want to change this, go to <MGW-TK_HOME>/conf/toolkit-config.toml)
 Enter Trust store location: [lib/platform/bre/security/ballerinaTruststore.p12]
 
 Enter Trust store password: [ use default? ]

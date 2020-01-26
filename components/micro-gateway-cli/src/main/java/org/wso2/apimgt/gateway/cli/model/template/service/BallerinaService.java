@@ -25,12 +25,13 @@ import io.swagger.v3.oas.models.tags.Tag;
 import org.wso2.apimgt.gateway.cli.constants.OpenAPIConstants;
 import org.wso2.apimgt.gateway.cli.exception.BallerinaServiceGenException;
 import org.wso2.apimgt.gateway.cli.exception.CLIRuntimeException;
+import org.wso2.apimgt.gateway.cli.model.config.BasicAuth;
 import org.wso2.apimgt.gateway.cli.model.config.Config;
 import org.wso2.apimgt.gateway.cli.model.config.ContainerConfig;
 import org.wso2.apimgt.gateway.cli.model.mgwcodegen.MgwEndpointConfigDTO;
 import org.wso2.apimgt.gateway.cli.model.rest.ext.ExtendedAPI;
+import org.wso2.apimgt.gateway.cli.utils.CmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.CodegenUtils;
-import org.wso2.apimgt.gateway.cli.utils.GatewayCmdUtils;
 import org.wso2.apimgt.gateway.cli.utils.OpenAPICodegenUtils;
 
 import java.util.AbstractMap;
@@ -60,6 +61,9 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     //to recognize whether it is a devfirst approach
     private boolean isDevFirst = true;
 
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<String> authProviders;
+
     @SuppressFBWarnings(value = "UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR")
     private ExtendedAPI api;
 
@@ -75,8 +79,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     public BallerinaService buildContext(OpenAPI openAPI) {
         this.info = openAPI.getInfo();
         this.tags = openAPI.getTags();
-        this.containerConfig = GatewayCmdUtils.getContainerConfig();
-        this.config = GatewayCmdUtils.getConfig();
+        this.containerConfig = CmdUtils.getContainerConfig();
+        this.config = CmdUtils.getConfig();
         return this;
     }
 
@@ -259,8 +263,8 @@ public class BallerinaService implements BallerinaOpenAPIObject<BallerinaService
     }
 
     private void setSecuritySchemas(String schemas) {
-        Config config = GatewayCmdUtils.getConfig();
-        config.setBasicAuth(OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas));
+        BasicAuth basicAuth = OpenAPICodegenUtils.generateBasicAuthFromSecurity(schemas);
+        authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth);
     }
 
     public void setIsDevFirst(boolean value) {

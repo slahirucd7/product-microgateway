@@ -20,18 +20,7 @@ import ballerina/runtime;
 import ballerina/time;
 
 boolean isAnalyticsEnabled = false;
-boolean isOldAnalyticsEnalbed = false;
 boolean configsRead = false;
-
-//gRPCConfigs
-boolean isgRPCAnalyticsEnabled = false;
-boolean gRPCConfigsRead = false;
-string endpointURL = "";
-string gRPCKeyStoreFile = "";
-string gRPCKeyStorePassword = "";
-string gRPCTrustStoreFile = "";
-string gRPCTrustStorePassword = "";
-int gRPCReconnectTime = 3000;
 
 function populateThrottleAnalyticsDTO(http:FilterContext context) returns (ThrottleAnalyticsEventDTO | error) {
     boolean isSecured = <boolean>context.attributes[IS_SECURED];
@@ -40,13 +29,12 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
     if (apiConfiguration is APIConfiguration) {
         eventDto.apiVersion = apiConfiguration.apiVersion;
-        eventDto.userTenantDomain = publisherStringExtractorForAnalytics(apiConfiguration.publisher,"userTenantDomain");
-        eventDto.apiCreator = publisherStringExtractorForAnalytics(apiConfiguration.publisher,"apiCreator");
     }
     time:Time time = time:currentTime();
     int currentTimeMills = time.time;
 
     map<json> metaInfo = {};
+    eventDto.userTenantDomain = getTenantDomain(context);
     eventDto.apiName = getApiName(context);
     eventDto.apiContext = getContext(context);
     eventDto.throttledTime = currentTimeMills;
@@ -60,6 +48,7 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         .attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
         eventDto.userName = authContext.username;
+        eventDto.apiCreator = authContext.apiPublisher;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
         eventDto.subscriber = authContext.subscriber;
@@ -67,6 +56,10 @@ function populateThrottleAnalyticsDTO(http:FilterContext context) returns (Throt
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.userName = END_USER_ANONYMOUS;
         APIConfiguration? apiConfig = apiConfigAnnotationMap[context.getServiceName()];
+        if (apiConfig is APIConfiguration) {
+            var api_Creator = apiConfig.publisher;
+            eventDto.apiCreator = api_Creator;
+        }
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
         eventDto.subscriber = END_USER_ANONYMOUS;
@@ -90,8 +83,6 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
     if (apiConfig is APIConfiguration) {
         var api_Version = apiConfig.apiVersion;
         eventDto.apiVersion = api_Version;
-        eventDto.userTenantDomain = publisherStringExtractorForAnalytics(apiConfig.publisher,"userTenantDomain");
-        eventDto.apiCreator = publisherStringExtractorForAnalytics(apiConfig.publisher,"apiCreator");
     }
     eventDto.apiName = getApiName(context);
     http:HttpResourceConfig? httpResourceConfig = resourceAnnotationMap[context.attributes["ResourceName"].toString()];
@@ -110,16 +101,23 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
         AuthenticationContext authContext = <AuthenticationContext>context.attributes[AUTHENTICATION_CONTEXT];
         metaInfo["keyType"] = authContext.keyType;
         eventDto.consumerKey = authContext.consumerKey;
+        eventDto.apiCreator = authContext.apiPublisher;
         eventDto.userName = authContext.username;
         eventDto.applicationName = authContext.applicationName;
         eventDto.applicationId = authContext.applicationId;
+        eventDto.userTenantDomain = authContext.subscriberTenantDomain;
     } else {
         metaInfo["keyType"] = PRODUCTION_KEY_TYPE;
         eventDto.consumerKey = ANONYMOUS_CONSUMER_KEY;
         APIConfiguration? apiConfigs = apiConfigAnnotationMap[context.getServiceName()];
+        if (apiConfigs is APIConfiguration) {
+            var api_Creater = apiConfigs.publisher;
+            eventDto.apiCreator = api_Creater;
+        }
         eventDto.userName = END_USER_ANONYMOUS;
         eventDto.applicationName = ANONYMOUS_APP_NAME;
         eventDto.applicationId = ANONYMOUS_APP_ID;
+        eventDto.userTenantDomain = ANONYMOUS_USER_TENANT_DOMAIN;
     }
     metaInfo["correlationID"] = <string>context.attributes[MESSAGE_ID];
     eventDto.metaClientType = metaInfo.toString();
@@ -128,38 +126,14 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
 
 
 function getAnalyticsEnableConfig() {
-    isAnalyticsEnabled = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false);
-    isOldAnalyticsEnalbed =  <boolean>getConfigBooleanValue(OLD_FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE,false);
-    if (isOldAnalyticsEnalbed) {
-        rotatingTime = <int>getConfigIntValue(OLD_FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000); 
-        uploadingUrl = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,UPLOADING_EP,"https://localhost:9444/analytics/v1.0/usage/upload-file");
-        configsRead = true;
-    } else {
-        rotatingTime = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME,600000); 
-        uploadingUrl = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,UPLOADING_EP,"https://localhost:9444/analytics/v1.0/usage/upload-file");
-        configsRead = true;
-    }
-    printDebug(KEY_ANALYTICS_FILTER,"File upload analytics uploading URL : "+ uploadingUrl);
+    map<any> vals = getConfigMapValue(ANALYTICS);
+    isAnalyticsEnabled = <boolean>vals[ENABLE];
+    rotatingTime = <int>vals[ROTATING_TIME];
+    uploadingUrl = <string>vals[UPLOADING_EP];
+    configsRead = true;
     printDebug(KEY_UTILS, "Analytics configuration values read");
-    
 }
 
-function initializegRPCAnalytics() {
-    printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
-    isgRPCAnalyticsEnabled = <boolean>getConfigBooleanValue(GRPC_ANALYTICS,GRPC_ANALYTICS_ENABLE,false);
-    endpointURL = <string>getConfigValue(GRPC_ANALYTICS, GRPC_ENDPOINT_URL, "https://localhost:9806");
-    gRPCReconnectTime = <int>getConfigIntValue(GRPC_ANALYTICS,GRPC_RETRY_TIME_MILLISECONDS,6000);
-    printDebug(KEY_ANALYTICS_FILTER, "gRPC endpoint URL : " + endpointURL);
-    printDebug(KEY_ANALYTICS_FILTER, "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, "${ballerina.home}/bre/security/ballerinaKeystore.p12"));
-    printDebug(KEY_ANALYTICS_FILTER, "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, "ballerina"));
-    printDebug(KEY_ANALYTICS_FILTER, "gRPC trustStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, "${ballerina.home}/bre/security/ballerinaTruststore.p12"));
-    printDebug(KEY_ANALYTICS_FILTER, "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, "ballerina"));
-    printDebug(KEY_ANALYTICS_FILTER, "gRPC retry time  : " + gRPCReconnectTime.toString());
-
-    if (isgRPCAnalyticsEnabled) {
-        initGRPCService();
-    }
-}
 
 function initializeAnalytics() {
     if (!configsRead) {

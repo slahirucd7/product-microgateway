@@ -61,6 +61,8 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
     private String apiRequestInterceptor;
     private String apiResponseInterceptor;
     private BasicAuth basicAuth;
+    @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
+    private List<String> authProviders;
 
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD")
     private boolean hasProdEpConfig = false;
@@ -88,8 +90,11 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         this.parameters = new ArrayList<>();
         //to provide resource level security in dev-first approach
         this.basicAuth = OpenAPICodegenUtils.getMgwResourceBasicAuth(operation);
+        this.authProviders = OpenAPICodegenUtils.setAuthProviders(this.basicAuth);
         //to set resource level scopes in dev-first approach
         this.scope = OpenAPICodegenUtils.getMgwResourceScope(operation);
+        //set resource level endpoint configuration
+        setEpConfigDTO(operation);
         Map<String, Object> extensions = operation.getExtensions();
         if (extensions != null) {
             Optional<Object> resourceTier = Optional.ofNullable(extensions.get(X_THROTTLING_TIER));
@@ -102,8 +107,6 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
                     this.isSecured = false;
                 }
             });
-            //set resource level endpoint configuration
-            setEpConfigDTO(operation);
             //set resource level request interceptors
             Optional<Object> requestInterceptor = Optional.ofNullable(extensions
                     .get(OpenAPIConstants.REQUEST_INTERCEPTOR));
@@ -272,6 +275,7 @@ public class BallerinaOperation implements BallerinaOpenAPIObject<BallerinaOpera
         //update the ResourceBasicAuth property only if there is no security scheme provided during instantiation
         if (this.basicAuth == null) {
             this.basicAuth = basicAuth;
+            authProviders = OpenAPICodegenUtils.setAuthProviders(basicAuth);
         }
     }
 }
