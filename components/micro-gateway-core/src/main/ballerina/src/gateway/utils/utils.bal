@@ -620,36 +620,24 @@ public function getFilterConfigAnnotationMap() returns map<FilterConfiguration?>
     return filterConfigAnnotationMap;
 }
 
-#Gets API publisher string and provides api creator or userTenantDomain according to requiredString
+# Gets API publisher string and provides extracted userTenantDomain value.
+# 
 # + publisherString - API publisher string value
-# + requiredString - This could be either apiCreator or userTenantDomain
-# + return - Returns requested 'string' value extracted from publisherString
-public function publisherStringExtractorForAnalytics(string publisherString ,string requiredString) returns string {
+# + return - Returns userTenantDomain 'string' value after extraction.
+public function getUserTenantDomain(string publisherString) returns string {
     string[] resultSet = stringutils:split(publisherString , "@");
     int resultSetLength = resultSet.length();
+    //for super tenant domain users
     if (resultSetLength == 1) {
-          if (requiredString == "apiCreator") {
-              return resultSet[0];
-          }
-          if (requiredString == "userTenantDomain") {
-              return "carbon.super";
-          }
+          return "carbon.super";
     }
+    //for users not from the super tenant domain
     if (resultSetLength == 2) {
-          if (requiredString == "apiCreator") {
-              return resultSet[0];
-          }
-          if (requiredString == "userTenantDomain") {
-              return resultSet[1];
-          }
+          return resultSet[1];
     }
+    //for email signup users
     if (resultSetLength == 3) {
-        if (requiredString == "apiCreator") {
-              return resultSet[0]+resultSet[1];
-          }
-          if (requiredString == "userTenantDomain") {
-              return resultSet[2];
-          }
+          return resultSet[2];
     }
     return "not available";
 
