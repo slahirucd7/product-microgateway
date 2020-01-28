@@ -1,5 +1,4 @@
 import ballerina/grpc;
-import ballerina/log;
 import ballerina/task;
 
 grpc:StreamingClient gRPCEp = new grpc:StreamingClient();
@@ -38,8 +37,8 @@ AnalyticsSendServiceClient nonblockingGRPCAnalyticsClient = new(getConfigValue(G
 config = {
     secureSocket: {
         keyStore: {
-            path : getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH), 
-            password : getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD) 
+            path : getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH), 
+            password : getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD) 
         },
         trustStore: {
             path : getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH), 
@@ -96,7 +95,7 @@ public function dataToAnalytics(AnalyticsStreamMessage message){
     printDebug(KEY_GRPC_ANALYTICS, "gRPC analytics data publishing method executed.");
     grpc:Error? connErr = gRPCEp->send(message);
         if (connErr is grpc:Error) {
-            log:printInfo("Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
+            printInfo(KEY_GRPC_ANALYTICS, "Error from Connector: " + connErr.reason() + " - " + <string> connErr.detail()["message"]);
            
         } else {
             printDebug(KEY_GRPC_ANALYTICS, "gRPC analytics data published successfully: ");

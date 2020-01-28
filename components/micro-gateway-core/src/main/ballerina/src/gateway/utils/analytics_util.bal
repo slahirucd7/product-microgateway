@@ -123,7 +123,7 @@ function populateFaultAnalyticsDTO(http:FilterContext context, string err) retur
 
 
 function getAnalyticsEnableConfig() {
-    isAnalyticsEnabled = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE, false);
+    isAnalyticsEnabled = <boolean>getConfigBooleanValue(FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE, DEFAULT_ANALYTICS_ENABLED);
     isOldAnalyticsEnabled =  <boolean>getConfigBooleanValue(OLD_FILE_UPLOAD_ANALYTICS,FILE_UPLOAD_ENABLE, false);
     if (isOldAnalyticsEnabled) {
         //enables config reads for older versions
@@ -131,23 +131,22 @@ function getAnalyticsEnableConfig() {
         uploadingUrl = <string>getConfigValue(OLD_FILE_UPLOAD_ANALYTICS,UPLOADING_EP, DEFAULT_UPLOADING_EP);
         configsRead = true;
     } else {
-        rotatingTime = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME,DEFAULT_ROTATING_PERIOD_IN_MILLIS); 
+        rotatingTime = <int>getConfigIntValue(FILE_UPLOAD_ANALYTICS,ROTATING_TIME, DEFAULT_ROTATING_PERIOD_IN_MILLIS); 
         uploadingUrl = <string>getConfigValue(FILE_UPLOAD_ANALYTICS,UPLOADING_EP, DEFAULT_UPLOADING_EP);
         configsRead = true;
     }
     printDebug(KEY_ANALYTICS_FILTER, "File upload analytics uploading URL : "+ uploadingUrl);
-    printDebug(KEY_UTILS, "Analytics configuration values read");
-    
+    printDebug(KEY_UTILS, "Analytics configuration values read"); 
 }
 
 function initializegRPCAnalytics() {
     printDebug(KEY_UTILS, "gRPC Analytics configuration values read");
-    isGrpcAnalyticsEnabled = <boolean>getConfigBooleanValue(GRPC_ANALYTICS, GRPC_ANALYTICS_ENABLE, DEFAULT_GRPC_ANALYTICS_ENABLED);
+    isGrpcAnalyticsEnabled = <boolean>getConfigBooleanValue(GRPC_ANALYTICS, GRPC_ANALYTICS_ENABLE, DEFAULT_ANALYTICS_ENABLED);
     endpointURL = <string>getConfigValue(GRPC_ANALYTICS, GRPC_ENDPOINT_URL, DEFAULT_GRPC_ENDPOINT_URL);
     gRPCReconnectTime = <int>getConfigIntValue(GRPC_ANALYTICS, GRPC_RETRY_TIME_MILLISECONDS, DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES);
     printDebug(KEY_GRPC_ANALYTICS, "gRPC endpoint URL : " + endpointURL);
-    printDebug(KEY_GRPC_ANALYTICS, "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH));
-    printDebug(KEY_GRPC_ANALYTICS, "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, LISTENER_CONF_KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD));
+    printDebug(KEY_GRPC_ANALYTICS, "gRPC keyStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PATH, DEFAULT_KEY_STORE_PATH));
+    printDebug(KEY_GRPC_ANALYTICS, "gRPC keyStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, KEY_STORE_PASSWORD, DEFAULT_KEY_STORE_PASSWORD));
     printDebug(KEY_GRPC_ANALYTICS, "gRPC trustStore file : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PATH, DEFAULT_TRUST_STORE_PATH));
     printDebug(KEY_GRPC_ANALYTICS, "gRPC tustStore password  : " + <string>getConfigValue(LISTENER_CONF_INSTANCE_ID, TRUST_STORE_PASSWORD, DEFAULT_TRUST_STORE_PASSWORD));
     printDebug(KEY_GRPC_ANALYTICS, "gRPC retry time  : " + gRPCReconnectTime.toString());

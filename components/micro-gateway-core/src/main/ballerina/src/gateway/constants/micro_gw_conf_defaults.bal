@@ -58,13 +58,9 @@ public const int DEFAULT_INITIAL_DELAY_IN_MILLIS = 5000;
 public const string DEFAULT_UPLOADING_EP = "https://localhost:9444/analytics/v1.0/usage/upload-file";
 public const int DEFAULT_ROTATING_PERIOD_IN_MILLIS =  600000;
 public const boolean DEFAULT_TASK_UPLOAD_FILES_ENABLED = true;
-public const string DEFAULT_FILE_UPLOAD_ANALYTICS_USERNAME = "admin";
-public const string DEFAULT_FILE_UPLOAD_ANALYTICS_PASSWORD = "admin";
 //constants for gRPC analytics 
-public const boolean DEFAULT_GRPC_ANALYTICS_ENABLED = false;
 public const string DEFAULT_GRPC_ENDPOINT_URL = "https://localhost:9806";
 public const int DEFAULT_GRPC_RECONNECT_TIME_IN_MILLES = 6000;
-
 
 public const boolean DEFAULT_HTTP2_ENABLED = false;
 
@@ -102,3 +98,10 @@ public const string DEFAULT_PERSISTENT_MESSAGE_USERNAME = "root";
 public const string DEFAULT_PERSISTENT_MESSAGE_PASSWORD = "root";
 
 public const boolean DEFAULT_HOSTNAME_VERIFICATION_ENABLED = true;
+
+public const string DEFAULT_API_KEY_ISSUER = "https://localhost:9095/apikey";
+public const string DEFAULT_API_KEY_ALIAS = "ballerina";
+public const boolean DEFAULT_VALIDATE_APIS_ENABLED = false;
+
+public const boolean DEFAULT_API_KEY_ISSUER_ENABLED = true;
+public const int DEFAULT_API_KEY_VALIDITY_TIME = -1;
