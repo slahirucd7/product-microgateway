@@ -146,8 +146,8 @@ public class OpenAPICodegenUtils {
         switch (swaggerVersion) {
             case "2":
                 Swagger swagger = new SwaggerParser().parse(api.getApiDefinition());
-                //sets title name similar to API name in swagger definition
-                //without this modification, two seperate rows will be added to APIM analytics dashboard tables
+                //Sets title name similar to API name in swagger definition.
+                //Without this modification, two seperate rows will be added to APIM analytics dashboard tables.
                 //(For APIM and Microgateway API invokes)
                 swagger.getInfo().setTitle(api.getName());
                 if (isExpand) {
@@ -157,8 +157,8 @@ public class OpenAPICodegenUtils {
             case "3":
                 SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(api.getApiDefinition());
                 OpenAPI openAPI = swaggerParseResult.getOpenAPI();
-                //sets title similar to API name in open API definition
-                //without this modification, two seperate rows added to analytics tables
+                //Sets title similar to API name in open API definition
+                //Without this modification, two seperate rows will be added to analytics dashboard tables.
                 //(For APIM and Microgateway API invokes)
                 openAPI.getInfo().setTitle(api.getName());
                 if (isExpand) {
@@ -230,10 +230,8 @@ public class OpenAPICodegenUtils {
             extensionsMap.put(OpenAPIConstants.AUTHORIZATION_HEADER, api.getAuthorizationHeader());
         }
         if (api.getProvider() != null) {
-            // outStream.println("OpenAPICodeGenUtils : " + api.getProvider());
             extensionsMap.put(OpenAPIConstants.API_OWNER, api.getProvider());
         }
-
         return extensionsMap;
     }
 
@@ -303,7 +301,6 @@ public class OpenAPICodegenUtils {
         api.setSpecificBasepath(openAPI.getExtensions().get(OpenAPIConstants.BASEPATH).toString());
         //assigns x-wso2-owner value to API provider 
         if (openAPI.getExtensions().get(OpenAPIConstants.API_OWNER) != null) {
-            // outStream.println("OpenAPI : " + openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
             api.setProvider(openAPI.getExtensions().get(OpenAPIConstants.API_OWNER).toString());
         }
         try {

@@ -94,10 +94,10 @@ public function generateRequestResponseExecutionDataEvent(http:Response response
         requestResponseExecutionDTO.applicationName = ANONYMOUS_APP_NAME;
     }
     APIConfiguration? apiConfiguration = apiConfigAnnotationMap[context.getServiceName()];
-    printDebug(KEY_ANALYTICS_FILTER, apiConfigAnnotationMap.toString());
+    printDebug(KEY_ANALYTICS_FILTER, "Response stream API configurations : " + apiConfigAnnotationMap.toString());
     if (apiConfiguration is APIConfiguration) {
         if (!stringutils:equalsIgnoreCase("", <string>apiConfiguration.publisher)) {
-            //extrcts API creator and userTenantDomain from API publisher string value
+            //sets API creator and userTenantDomain
             printDebug(KEY_ANALYTICS_FILTER, "API publisher : " + apiConfiguration.publisher);
             requestResponseExecutionDTO.apiCreator = <string>apiConfiguration.publisher;
             printDebug(KEY_ANALYTICS_FILTER, "API creator : " + requestResponseExecutionDTO.apiCreator);
