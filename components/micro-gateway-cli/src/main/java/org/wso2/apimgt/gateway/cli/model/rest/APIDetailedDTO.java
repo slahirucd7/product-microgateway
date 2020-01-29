@@ -103,7 +103,7 @@ public class APIDetailedDTO extends APIInfoDTO {
     private List<String> accessControlRoles = new ArrayList<String>();
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
-    //provider string (used to set x-wso2-ownerin swagger definition)
+    // provider string - used to set x-wso2-owner in swagger definition
     private String provider = null;
 
     /**
