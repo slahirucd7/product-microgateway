@@ -50,7 +50,7 @@ public class EnforcerConfig {
     private String privateKeyPath = "";
     private AnalyticsDTO analyticsConfig;
     private Map<String, JWTTransformer> jwtTransformerMap = new HashMap<>();
-    private AuthHeaderDto authHeader;
+    private AuthHeaderDto authHeaderDto;
     private ManagementCredentialsDto management;
     private AdminRestServerDto restServer;
 
@@ -142,12 +142,12 @@ public class EnforcerConfig {
         this.jwtTransformerMap = jwtTransformerMap;
     }
 
-    public AuthHeaderDto getAuthHeader() {
-        return authHeader;
+    public AuthHeaderDto getAuthHeaderDto() {
+        return authHeaderDto;
     }
 
-    public void setAuthHeader(AuthHeaderDto authHeader) {
-        this.authHeader = authHeader;
+    public void setAuthHeaderDto(AuthHeaderDto authHeaderDto) {
+        this.authHeaderDto = authHeaderDto;
     }
 
     public ManagementCredentialsDto getManagement() {

@@ -22,6 +22,7 @@ private static final long serialVersionUID = 0L;
   private AuthHeader() {
     authorizationHeader_ = "";
     testConsoleHeaderName_ = "";
+    apiKeyHeader_ = "";
   }
 
   @java.lang.Override
@@ -69,6 +70,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             testConsoleHeaderName_ = s;
+            break;
+          }
+          case 34: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            apiKeyHeader_ = s;
             break;
           }
           default: {
@@ -202,6 +209,52 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int APIKEYHEADER_FIELD_NUMBER = 4;
+  private volatile java.lang.Object apiKeyHeader_;
+  /**
+   * <pre>
+   * Header name for API key
+   * </pre>
+   *
+   * <code>string apiKeyHeader = 4;</code>
+   * @return The apiKeyHeader.
+   */
+  @java.lang.Override
+  public java.lang.String getApiKeyHeader() {
+    java.lang.Object ref = apiKeyHeader_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      apiKeyHeader_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   * Header name for API key
+   * </pre>
+   *
+   * <code>string apiKeyHeader = 4;</code>
+   * @return The bytes for apiKeyHeader.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getApiKeyHeaderBytes() {
+    java.lang.Object ref = apiKeyHeader_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      apiKeyHeader_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -225,6 +278,9 @@ private static final long serialVersionUID = 0L;
     if (!getTestConsoleHeaderNameBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, testConsoleHeaderName_);
     }
+    if (!getApiKeyHeaderBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 4, apiKeyHeader_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -243,6 +299,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getTestConsoleHeaderNameBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, testConsoleHeaderName_);
+    }
+    if (!getApiKeyHeaderBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, apiKeyHeader_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -265,6 +324,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getAuthorizationHeader())) return false;
     if (!getTestConsoleHeaderName()
         .equals(other.getTestConsoleHeaderName())) return false;
+    if (!getApiKeyHeader()
+        .equals(other.getApiKeyHeader())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -283,6 +344,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getAuthorizationHeader().hashCode();
     hash = (37 * hash) + TESTCONSOLEHEADERNAME_FIELD_NUMBER;
     hash = (53 * hash) + getTestConsoleHeaderName().hashCode();
+    hash = (37 * hash) + APIKEYHEADER_FIELD_NUMBER;
+    hash = (53 * hash) + getApiKeyHeader().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -426,6 +489,8 @@ private static final long serialVersionUID = 0L;
 
       testConsoleHeaderName_ = "";
 
+      apiKeyHeader_ = "";
+
       return this;
     }
 
@@ -455,6 +520,7 @@ private static final long serialVersionUID = 0L;
       result.enableOutboundAuthHeader_ = enableOutboundAuthHeader_;
       result.authorizationHeader_ = authorizationHeader_;
       result.testConsoleHeaderName_ = testConsoleHeaderName_;
+      result.apiKeyHeader_ = apiKeyHeader_;
       onBuilt();
       return result;
     }
@@ -512,6 +578,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getTestConsoleHeaderName().isEmpty()) {
         testConsoleHeaderName_ = other.testConsoleHeaderName_;
+        onChanged();
+      }
+      if (!other.getApiKeyHeader().isEmpty()) {
+        apiKeyHeader_ = other.apiKeyHeader_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -754,6 +824,102 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       testConsoleHeaderName_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object apiKeyHeader_ = "";
+    /**
+     * <pre>
+     * Header name for API key
+     * </pre>
+     *
+     * <code>string apiKeyHeader = 4;</code>
+     * @return The apiKeyHeader.
+     */
+    public java.lang.String getApiKeyHeader() {
+      java.lang.Object ref = apiKeyHeader_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        apiKeyHeader_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Header name for API key
+     * </pre>
+     *
+     * <code>string apiKeyHeader = 4;</code>
+     * @return The bytes for apiKeyHeader.
+     */
+    public com.google.protobuf.ByteString
+        getApiKeyHeaderBytes() {
+      java.lang.Object ref = apiKeyHeader_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        apiKeyHeader_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     * Header name for API key
+     * </pre>
+     *
+     * <code>string apiKeyHeader = 4;</code>
+     * @param value The apiKeyHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiKeyHeader(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      apiKeyHeader_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Header name for API key
+     * </pre>
+     *
+     * <code>string apiKeyHeader = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearApiKeyHeader() {
+      
+      apiKeyHeader_ = getDefaultInstance().getApiKeyHeader();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     * Header name for API key
+     * </pre>
+     *
+     * <code>string apiKeyHeader = 4;</code>
+     * @param value The bytes for apiKeyHeader to set.
+     * @return This builder for chaining.
+     */
+    public Builder setApiKeyHeaderBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      apiKeyHeader_ = value;
       onChanged();
       return this;
     }

@@ -18,4 +18,7 @@ message AuthHeader {
     string authorizationHeader = 2;
 
     string testConsoleHeaderName = 3;
+
+    // Header name for API key
+    string apiKeyHeader = 4;
 }

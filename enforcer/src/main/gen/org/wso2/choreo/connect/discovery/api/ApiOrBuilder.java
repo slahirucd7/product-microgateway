@@ -256,4 +256,16 @@ public interface ApiOrBuilder extends
    */
   com.google.protobuf.ByteString
       getOrganizationIdBytes();
+
+  /**
+   * <code>string apiKeyHeader = 18;</code>
+   * @return The apiKeyHeader.
+   */
+  java.lang.String getApiKeyHeader();
+  /**
+   * <code>string apiKeyHeader = 18;</code>
+   * @return The bytes for apiKeyHeader.
+   */
+  com.google.protobuf.ByteString
+      getApiKeyHeaderBytes();
 }

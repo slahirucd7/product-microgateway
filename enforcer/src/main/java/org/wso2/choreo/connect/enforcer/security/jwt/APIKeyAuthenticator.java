@@ -23,6 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
+import org.wso2.choreo.connect.enforcer.util.FilterUtils;
+
+import java.util.Map;
 
 /**
  * Extends the APIKeyHandler to authenticate request using API Key.
@@ -33,6 +36,20 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     public APIKeyAuthenticator() {
         log.info("API key authenticator created.");
+    }
+
+    @Override
+    public boolean canAuthenticate(RequestContext requestContext) {
+        String apiKey = retrieveAPIKeyHeaderValue(requestContext);
+        if (apiKey != null && apiKey.split("\\.").length == 3) {
+            return true;
+        }
+        return false;
+    }
+
+    private String retrieveAPIKeyHeaderValue(RequestContext requestContext) {
+        Map<String, String> headers = requestContext.getHeaders();
+        return headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
     }
 
     @Override
