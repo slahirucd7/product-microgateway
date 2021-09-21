@@ -517,15 +517,27 @@ public class FilterUtils {
     }
 
     public static String getAuthHeaderName(RequestContext requestContext) {
-        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
+        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeaderDto();
         String authHeaderName = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader();
         if (StringUtils.isEmpty(authHeaderName)) {
-            authHeaderName = authHeader.getAuthorizationHeader();
+            authHeaderName = authHeaderDto.getAuthorizationHeader();
         }
         if (StringUtils.isEmpty(authHeaderName)) {
             authHeaderName = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
         }
         return authHeaderName.toLowerCase();
+    }
+
+    public static String getAPIKeyHeaderName(RequestContext requestContext) {
+        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeaderDto();
+        String apiKeyHeader = requestContext.getMatchedAPI().getAPIConfig().getApiKeyHeader();
+        if (StringUtils.isEmpty(apiKeyHeader)) {
+            apiKeyHeader = authHeaderDto.getApiKeyHeader();
+        }
+        if (StringUtils.isEmpty(apiKeyHeader)) {
+            apiKeyHeader = APIConstants.API_SECURITY_API_KEY;
+        }
+        return apiKeyHeader.toLowerCase();
     }
 
     /**

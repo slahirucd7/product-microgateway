@@ -76,7 +76,7 @@ public class RestAPI implements API {
                 .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).build();
+                .organizationId(api.getOrganizationId()).apiKeyHeader(api.getApiKeyHeader()).build();
         initFilters();
         return basePath;
     }
@@ -100,10 +100,11 @@ public class RestAPI implements API {
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
         // Process to-be-removed headers
-        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
-        if (!authHeader.isEnableOutboundAuthHeader()) {
+        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeaderDto();
+        if (!authHeaderDto.isEnableOutboundAuthHeader()) {
             String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
             requestContext.getRemoveHeaders().add(authHeaderName);
+            //check whether this is required for API key
         }
 
         if (executeFilterChain(requestContext)) {

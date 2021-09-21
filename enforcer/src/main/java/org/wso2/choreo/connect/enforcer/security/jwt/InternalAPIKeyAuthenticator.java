@@ -57,7 +57,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
         String internalKey = requestContext.getHeaders().get(
-                ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
+                ConfigHolder.getInstance().getConfig().getAuthHeaderDto().getTestConsoleHeaderName().toLowerCase());
         if (internalKey != null && internalKey.split("\\.").length == 3) {
             return true;
         }
