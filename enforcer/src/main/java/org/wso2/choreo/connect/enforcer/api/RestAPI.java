@@ -76,7 +76,7 @@ public class RestAPI implements API {
                 .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
                 .productionUrls(productionUrls).sandboxUrls(sandboxUrls)
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).apiKeyHeader(api.getApiKeyHeader()).build();
+                .organizationId(api.getOrganizationId()).build();
         initFilters();
         return basePath;
     }

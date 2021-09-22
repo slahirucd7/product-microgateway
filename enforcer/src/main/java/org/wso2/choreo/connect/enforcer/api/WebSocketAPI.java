@@ -66,7 +66,7 @@ public class WebSocketAPI implements API {
                 .apiType(apiType).apiLifeCycleState(apiLifeCycleState)
                 .securitySchema(securitySchemes).tier(api.getTier()).endpointSecurity(api.getEndpointSecurity())
                 .authHeader(api.getAuthorizationHeader()).disableSecurity(api.getDisableSecurity())
-                .organizationId(api.getOrganizationId()).apiKeyHeader(api.getApiKeyHeader()).build();
+                .organizationId(api.getOrganizationId()).build();
         initFilters();
         initUpgradeFilters();
         return basePath;

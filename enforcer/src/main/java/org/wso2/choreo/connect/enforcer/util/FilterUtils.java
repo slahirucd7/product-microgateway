@@ -534,9 +534,9 @@ public class FilterUtils {
         //String apiKeyHeader = requestContext.getMatchedAPI().getAPIConfig().getSecuritySchemas();
         //In future process the security schemas list and get the API key.
         //Then the first if condition below will be replaced with that logic.
-        if (StringUtils.isEmpty(apiKeyHeader)) {
-            apiKeyHeader = authHeaderDto.getApiKeyHeader();
-        }
+//        if (StringUtils.isEmpty(apiKeyHeader)) {
+//            apiKeyHeader = authHeaderDto.getApiKeyHeader();
+//        }
         if (StringUtils.isEmpty(apiKeyHeader)) {
             apiKeyHeader = APIConstants.API_SECURITY_API_KEY;
         }
