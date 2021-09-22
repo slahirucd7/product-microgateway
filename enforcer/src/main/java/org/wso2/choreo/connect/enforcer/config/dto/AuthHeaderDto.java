@@ -25,7 +25,6 @@ public class AuthHeaderDto {
     private boolean enableOutboundAuthHeader = false;
     private String authorizationHeader = "";
     private String testConsoleHeaderName = "";
-    private String apiKeyHeader = "";
 
     public String getAuthorizationHeader() {
         return authorizationHeader;
@@ -49,13 +48,5 @@ public class AuthHeaderDto {
 
     public String getTestConsoleHeaderName() {
         return testConsoleHeaderName;
-    }
-
-    public void setApiKeyHeader(String apiKeyHeader) {
-        this.apiKeyHeader = apiKeyHeader;
-    }
-
-    public String getApiKeyHeader() {
-        return apiKeyHeader;
     }
 }
