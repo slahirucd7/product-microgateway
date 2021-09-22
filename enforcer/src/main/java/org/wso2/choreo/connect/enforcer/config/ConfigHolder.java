@@ -174,7 +174,6 @@ public class ConfigHolder {
         authHeaderDto.setAuthorizationHeader(authHeader.getAuthorizationHeader());
         authHeaderDto.setEnableOutboundAuthHeader(authHeader.getEnableOutboundAuthHeader());
         authHeaderDto.setTestConsoleHeaderName(authHeader.getTestConsoleHeaderName());
-        authHeaderDto.setApiKeyHeader(authHeader.getApiKeyHeader());
         config.setAuthHeader(authHeaderDto);
     }
 

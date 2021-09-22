@@ -30,14 +30,13 @@ public final class AuthHeaderProto {
     java.lang.String[] descriptorData = {
       "\n0wso2/discovery/config/enforcer/auth_he" +
       "ader.proto\022\036wso2.discovery.config.enforc" +
-      "er\"\200\001\n\nAuthHeader\022 \n\030enableOutboundAuthH" +
-      "eader\030\001 \001(\010\022\033\n\023authorizationHeader\030\002 \001(\t" +
-      "\022\035\n\025testConsoleHeaderName\030\003 \001(\t\022\024\n\014apiKe" +
-      "yHeader\030\004 \001(\tB\226\001\n1org.wso2.choreo.connec" +
-      "t.discovery.config.enforcerB\017AuthHeaderP" +
-      "rotoP\001ZNgithub.com/envoyproxy/go-control" +
-      "-plane/wso2/discovery/config/enforcer;en" +
-      "forcerb\006proto3"
+      "er\"j\n\nAuthHeader\022 \n\030enableOutboundAuthHe" +
+      "ader\030\001 \001(\010\022\033\n\023authorizationHeader\030\002 \001(\t\022" +
+      "\035\n\025testConsoleHeaderName\030\003 \001(\tB\226\001\n1org.w" +
+      "so2.choreo.connect.discovery.config.enfo" +
+      "rcerB\017AuthHeaderProtoP\001ZNgithub.com/envo" +
+      "yproxy/go-control-plane/wso2/discovery/c" +
+      "onfig/enforcer;enforcerb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -48,7 +47,7 @@ public final class AuthHeaderProto {
     internal_static_wso2_discovery_config_enforcer_AuthHeader_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_wso2_discovery_config_enforcer_AuthHeader_descriptor,
-        new java.lang.String[] { "EnableOutboundAuthHeader", "AuthorizationHeader", "TestConsoleHeaderName", "ApiKeyHeader", });
+        new java.lang.String[] { "EnableOutboundAuthHeader", "AuthorizationHeader", "TestConsoleHeaderName", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

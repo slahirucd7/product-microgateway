@@ -48,24 +48,4 @@ public interface AuthHeaderOrBuilder extends
    */
   com.google.protobuf.ByteString
       getTestConsoleHeaderNameBytes();
-
-  /**
-   * <pre>
-   * Header name for API key
-   * </pre>
-   *
-   * <code>string apiKeyHeader = 4;</code>
-   * @return The apiKeyHeader.
-   */
-  java.lang.String getApiKeyHeader();
-  /**
-   * <pre>
-   * Header name for API key
-   * </pre>
-   *
-   * <code>string apiKeyHeader = 4;</code>
-   * @return The bytes for apiKeyHeader.
-   */
-  com.google.protobuf.ByteString
-      getApiKeyHeaderBytes();
 }
