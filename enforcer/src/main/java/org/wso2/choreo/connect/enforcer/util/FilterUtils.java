@@ -517,7 +517,7 @@ public class FilterUtils {
     }
 
     public static String getAuthHeaderName(RequestContext requestContext) {
-        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeaderDto();
+        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeader();
         String authHeaderName = requestContext.getMatchedAPI().getAPIConfig().getAuthHeader();
         if (StringUtils.isEmpty(authHeaderName)) {
             authHeaderName = authHeaderDto.getAuthorizationHeader();
@@ -529,8 +529,11 @@ public class FilterUtils {
     }
 
     public static String getAPIKeyHeaderName(RequestContext requestContext) {
-        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeaderDto();
+        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeader();
         String apiKeyHeader = requestContext.getMatchedAPI().getAPIConfig().getApiKeyHeader();
+        //String apiKeyHeader = requestContext.getMatchedAPI().getAPIConfig().getSecuritySchemas();
+        //In future process the security schemas list and get the API key.
+        //Then the first if condition below will be replaced with that logic.
         if (StringUtils.isEmpty(apiKeyHeader)) {
             apiKeyHeader = authHeaderDto.getApiKeyHeader();
         }

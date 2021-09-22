@@ -18,13 +18,22 @@
 
 package org.wso2.choreo.connect.enforcer.security.jwt;
 
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import net.minidev.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
+import org.wso2.choreo.connect.enforcer.common.CacheProvider;
+import org.wso2.choreo.connect.enforcer.constants.APIConstants;
+import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
+import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.text.ParseException;
 import java.util.Map;
 
 /**
@@ -35,16 +44,13 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     private static final Log log = LogFactory.getLog(APIKeyAuthenticator.class);
 
     public APIKeyAuthenticator() {
-        log.info("API key authenticator created.");
+        log.info("API key authenticator initialized.");
     }
 
     @Override
     public boolean canAuthenticate(RequestContext requestContext) {
         String apiKey = retrieveAPIKeyHeaderValue(requestContext);
-        if (apiKey != null && apiKey.split("\\.").length == 3) {
-            return true;
-        }
-        return false;
+        return isAPIKey(apiKey);
     }
 
     private String retrieveAPIKeyHeaderValue(RequestContext requestContext) {
@@ -54,16 +60,80 @@ public class APIKeyAuthenticator extends APIKeyHandler {
 
     @Override
     public AuthenticationContext authenticate(RequestContext requestContext) throws APISecurityException {
-        return null;
+        if (requestContext.getMatchedAPI() != null) {
+            log.debug("API Key Authentication initialized");
+
+            try {
+                String apiKey = retrieveAPIKeyHeaderValue(requestContext);
+
+                // gives an error if API key not found
+                getKeyNotFoundError(apiKey);
+
+                String[] splitToken = apiKey.split("\\.");
+                SignedJWT signedJWT = SignedJWT.parse(apiKey);
+                JWSHeader jwsHeader = signedJWT.getHeader();
+                JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
+
+                // Check if the decoded header contains type as 'InternalKey' ???
+
+                String tokenIdentifier = payload.getJWTID();
+
+                //check for contain in revoke map.
+                checkInRevokedMap(tokenIdentifier, splitToken);
+
+                String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+                String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
+
+                // Verify the token if it is found in cache
+                JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
+                        CacheProvider.getGatewayAPIKeyDataCache().getIfPresent(tokenIdentifier);
+                boolean isVerified = verifyTokenInCache(tokenIdentifier, apiKey, payload, splitToken,
+                        "API Key", jwtTokenPayloadInfo);
+
+                // Verify token when it is not found in cache
+                if (!isVerified) {
+                    isVerified = verifyTokenNotInCache(jwsHeader, signedJWT, splitToken, payload, "API Key");
+                }
+
+                if (isVerified) {
+                    log.debug("API Key signature is verified.");
+
+                    if (jwtTokenPayloadInfo == null) {
+                        log.debug("InternalKey payload not found in the cache.");
+
+                        jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
+                        jwtTokenPayloadInfo.setPayload(payload);
+                        jwtTokenPayloadInfo.setAccessToken(apiKey);
+                        CacheProvider.getGatewayAPIKeyDataCache().put(tokenIdentifier, jwtTokenPayloadInfo);
+                    }
+
+                    JSONObject api = validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
+
+                    log.debug("API Key authentication successful.");
+
+                    return FilterUtils.generateAuthenticationContext(tokenIdentifier, payload, api,
+                            requestContext.getMatchedAPI().getAPIConfig().getTier(),
+                            requestContext.getMatchedAPI().getAPIConfig().getUuid());
+                }
+            } catch (ParseException e) {
+                log.debug("API Key authentication failed. ", e);
+            }
+
+        }
+
+        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                APISecurityConstants.API_AUTH_GENERAL_ERROR, APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
     }
 
     @Override
     public String getChallengeString() {
-        return null;
+        return "";
+        //check again
     }
 
     @Override
     public int getPriority() {
-        return 0;
+        return 10;
+        //check again
     }
 }
