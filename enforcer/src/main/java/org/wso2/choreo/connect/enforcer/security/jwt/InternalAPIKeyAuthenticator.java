@@ -21,7 +21,6 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
@@ -31,9 +30,7 @@ import org.wso2.choreo.connect.enforcer.constants.APIConstants;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
-import org.wso2.choreo.connect.enforcer.exception.EnforcerException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
-import org.wso2.choreo.connect.enforcer.security.jwt.validator.RevokedJWTDataHolder;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
@@ -85,55 +82,59 @@ public class InternalAPIKeyAuthenticator extends APIKeyHandler {
 
                 String tokenIdentifier = payload.getJWTID();
                 // check tokenIdentifier contains in revokedMap
-                if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenIdentifier)) {
-                    log.error("Invalid Internal Key. " + FilterUtils.getMaskedToken(splitToken[0]));
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                }
+//                if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(tokenIdentifier)) {
+//                    log.error("Invalid Internal Key. " + FilterUtils.getMaskedToken(splitToken[0]));
+//                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+//                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+//                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+//                }
+                checkInRevokedMap(tokenIdentifier, splitToken);
 
                 String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
                 String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
-                boolean isVerified = false;
+//                boolean isVerified = false;
 
                 // Verify token when it is found in cache
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
                         CacheProvider.getGatewayInternalKeyDataCache().getIfPresent(tokenIdentifier);
-                if (jwtTokenPayloadInfo != null) {
-                    String cachedToken = jwtTokenPayloadInfo.getAccessToken();
-                    isVerified = cachedToken.equals(internalKey) && !isJwtTokenExpired(payload, "InternalKey");
-                } else if (CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier) != null
-                        && internalKey
-                        .equals(CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier))) {
-
-                    log.debug("Internal Key retrieved from the invalid internal Key cache. Internal Key: "
-                            + FilterUtils.getMaskedToken(splitToken[0]));
-
-                    log.error("Invalid Internal Key. " + FilterUtils.getMaskedToken(splitToken[0]));
-                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                }
+//                if (jwtTokenPayloadInfo != null) {
+//                    String cachedToken = jwtTokenPayloadInfo.getAccessToken();
+//                    isVerified = cachedToken.equals(internalKey) && !isJwtTokenExpired(payload, "InternalKey");
+//                } else if (CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier) != null
+//                        && internalKey
+//                        .equals(CacheProvider.getInvalidGatewayInternalKeyCache().getIfPresent(tokenIdentifier))) {
+//
+//                    log.debug("Internal Key retrieved from the invalid internal Key cache. Internal Key: "
+//                            + FilterUtils.getMaskedToken(splitToken[0]));
+//
+//                    log.error("Invalid Internal Key. " + FilterUtils.getMaskedToken(splitToken[0]));
+//                    throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+//                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+//                            APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+//                }
+                boolean isVerified = verifyTokenInCache(tokenIdentifier, internalKey, payload, splitToken,
+                        "InternalKey", jwtTokenPayloadInfo);
 
                 // Verify token when it is not found in cache
                 if (!isVerified) {
-                    log.debug("Internal Key not found in the cache.");
-
-                    String alias = "";
-                    if (jwsHeader != null && StringUtils.isNotEmpty(jwsHeader.getKeyID())) {
-                        alias = jwsHeader.getKeyID();
-                    }
-
-                    try {
-                        isVerified = JWTUtil.verifyTokenSignature(signedJWT, alias) &&
-                                !isJwtTokenExpired(payload, "InternalKey");
-                    } catch (EnforcerException e) {
-                        log.error("Internal Key authentication failed. " +
-                                FilterUtils.getMaskedToken(splitToken[0]));
-                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
-                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
-                    }
+//                    log.debug("Internal Key not found in the cache.");
+//
+//                    String alias = "";
+//                    if (jwsHeader != null && StringUtils.isNotEmpty(jwsHeader.getKeyID())) {
+//                        alias = jwsHeader.getKeyID();
+//                    }
+//
+//                    try {
+//                        isVerified = JWTUtil.verifyTokenSignature(signedJWT, alias) &&
+//                                !isJwtTokenExpired(payload, "InternalKey");
+//                    } catch (EnforcerException e) {
+//                        log.error("Internal Key authentication failed. " +
+//                                FilterUtils.getMaskedToken(splitToken[0]));
+//                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+//                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
+//                                APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
+//                    }
+                    isVerified = verifyTokenNotInCache(jwsHeader, signedJWT, splitToken, payload, "InternalKey");
                 }
 
                 if (isVerified) {
