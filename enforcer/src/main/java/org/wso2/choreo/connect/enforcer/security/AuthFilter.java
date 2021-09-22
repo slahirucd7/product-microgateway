@@ -93,7 +93,7 @@ public class AuthFilter implements Filter {
         }
 
         Authenticator authenticator = new InternalAPIKeyAuthenticator(
-                ConfigHolder.getInstance().getConfig().getAuthHeaderDto().getTestConsoleHeaderName().toLowerCase());
+                ConfigHolder.getInstance().getConfig().getAuthHeader().getTestConsoleHeaderName().toLowerCase());
         authenticators.add(authenticator);
     
         Authenticator unsecuredAPIAuthenticator = new UnsecuredAPIAuthenticator();
