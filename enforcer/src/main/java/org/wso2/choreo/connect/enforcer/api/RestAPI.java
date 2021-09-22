@@ -100,8 +100,8 @@ public class RestAPI implements API {
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
 
         // Process to-be-removed headers
-        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeaderDto();
-        if (!authHeaderDto.isEnableOutboundAuthHeader()) {
+        AuthHeaderDto authHeader = ConfigHolder.getInstance().getConfig().getAuthHeader();
+        if (!authHeader.isEnableOutboundAuthHeader()) {
             String authHeaderName = FilterUtils.getAuthHeaderName(requestContext);
             requestContext.getRemoveHeaders().add(authHeaderName);
             //check whether this is required for API key

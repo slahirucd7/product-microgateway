@@ -175,7 +175,7 @@ public class ConfigHolder {
         authHeaderDto.setEnableOutboundAuthHeader(authHeader.getEnableOutboundAuthHeader());
         authHeaderDto.setTestConsoleHeaderName(authHeader.getTestConsoleHeaderName());
         authHeaderDto.setApiKeyHeader(authHeader.getApiKeyHeader());
-        config.setAuthHeaderDto(authHeaderDto);
+        config.setAuthHeader(authHeaderDto);
     }
 
     private void populateAuthService(Service cdsAuth) {
