@@ -44,7 +44,6 @@ import org.wso2.choreo.connect.enforcer.dto.JWTTokenPayloadInfo;
 import org.wso2.choreo.connect.enforcer.exception.APISecurityException;
 import org.wso2.choreo.connect.enforcer.security.AuthenticationContext;
 import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTConstants;
-import org.wso2.choreo.connect.enforcer.security.jwt.validator.JWTValidator;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
 import java.text.ParseException;
@@ -57,7 +56,6 @@ import java.util.Map;
 public class APIKeyAuthenticator extends APIKeyHandler {
 
     private static final Log log = LogFactory.getLog(APIKeyAuthenticator.class);
-    private JWTValidator jwtValidator = new JWTValidator();
     private AbstractAPIMgtGatewayJWTGenerator jwtGenerator;
     private boolean isGatewayTokenCacheEnabled;
 
@@ -72,16 +70,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
         return isAPIKey(apiKey);
     }
 
-//    private String retrieveAPIKeyFromHeader(RequestContext requestContext) {
-//        Map<String, String> headers = requestContext.getHeaders();
-//        return headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
-//    }
-//
-//    private String retrieveAPIKeyFromQueryParam(RequestContext requestContext) {
-//        Map<String, String> queryParameters = requestContext.getQueryParameters();
-//        return  queryParameters.get(FilterUtils.getAPIKeyHeaderName(requestContext));
-//    }
-
+    // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
         String apiKey;
         Map<String, String> headers = requestContext.getHeaders();
@@ -101,13 +90,15 @@ public class APIKeyAuthenticator extends APIKeyHandler {
             try {
                 String apiKey = getAPIKeyFromRequest(requestContext);
 
-                // gives an error if API key not found
+                // Gives an error if API key not found
                 getKeyNotFoundError(apiKey);
 
                 String[] splitToken = apiKey.split("\\.");
                 SignedJWT signedJWT = SignedJWT.parse(apiKey);
                 JWSHeader jwsHeader = signedJWT.getHeader();
                 JWTClaimsSet payload = signedJWT.getJWTClaimsSet();
+                String apiVersion = requestContext.getMatchedAPI().getAPIConfig().getVersion();
+                String apiContext = requestContext.getMatchedAPI().getAPIConfig().getBasePath();
 
                 // Avoids using internal API keys
                 if (isInternalKey(payload)) {
@@ -117,19 +108,19 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
 
-                //gives jti (also used to populate authentication context)
+                // Gives jti (also used to populate authentication context)
                 String tokenIdentifier = payload.getJWTID();
 
-                //check whether key contains in revoked map.
+                // Checks whether key contains in revoked map.
                 checkInRevokedMap(tokenIdentifier, splitToken);
 
-                // Verify the token if it is found in cache
+                // Verifies the token if it is found in cache
                 JWTTokenPayloadInfo jwtTokenPayloadInfo = (JWTTokenPayloadInfo)
                         CacheProvider.getGatewayAPIKeyDataCache().getIfPresent(tokenIdentifier);
                 boolean isVerified = verifyTokenInCache(tokenIdentifier, apiKey, payload, splitToken,
                         "API Key", jwtTokenPayloadInfo);
 
-                // Verify token when it is not found in cache
+                // Verifies token when it is not found in cache
                 if (!isVerified) {
                     isVerified = verifyTokenNotInCache(jwsHeader, signedJWT, splitToken, payload, "API Key");
                 }
@@ -149,7 +140,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     //Get APIKeyValidationInfoDTO
                     APIKeyValidationInfoDTO apiKeyValidationInfoDTO = getAPIKeyValidationDTO(requestContext, payload);
 
-                    // set endpoint security
+                    // Sets endpoint security
                     SecurityInfo securityInfo;
                     if (apiKeyValidationInfoDTO.getType() != null &&
                             requestContext.getMatchedAPI().getAPIConfig().getEndpointSecurity() != null) {
@@ -172,11 +163,11 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                         }
                     }
 
-//                    JSONObject api = validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
+                    validateAPISubscription(apiContext, apiVersion, payload, splitToken, false);
 
                     log.debug("API Key authentication successful.");
 
-                    //======= Analytics data processing begins
+                    // Begins analytics data processing
 
                     //Get SignedJWTInfo
                     SignedJWTInfo signedJWTInfo = getSignedJwt(apiKey);
@@ -209,7 +200,8 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     if (claims.getClaim("keytype") != null) {
                         authenticationContext.setKeyType(claims.getClaim("keytype").toString());
                     }
-
+                    log.debug("Analytics data processing for API Key (jiti) " + tokenIdentifier +
+                            " was successful");
                     return authenticationContext;
 
                 }
