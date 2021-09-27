@@ -529,8 +529,7 @@ public class FilterUtils {
     }
 
     public static String getAPIKeyHeaderName(RequestContext requestContext) {
-        AuthHeaderDto authHeaderDto = ConfigHolder.getInstance().getConfig().getAuthHeader();
-        String apiKeyHeader = requestContext.getMatchedAPI().getAPIConfig().getApiKeyHeader();
+        String apiKeyHeader = "";
         if (StringUtils.isEmpty(apiKeyHeader)) {
             apiKeyHeader = APIConstants.API_SECURITY_API_KEY;
         }
