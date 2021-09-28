@@ -169,11 +169,6 @@ public class APIConfig {
             return this;
         }
 
-//        public Builder apiKeyHeader(String apiKeyHeader) {
-//            this.apiKeyHeader = apiKeyHeader;
-//            return this;
-//        }
-
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;

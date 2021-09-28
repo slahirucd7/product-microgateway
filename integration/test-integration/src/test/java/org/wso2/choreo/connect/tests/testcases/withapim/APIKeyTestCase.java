@@ -135,17 +135,22 @@ public class APIKeyTestCase extends ApimBaseTest {
         HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(),
+                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
+                "Response code mismatched");
     }
 
     //Invoke API by including the API key as a query parameter
     @Test(description = "Test to check the API Key in header is working", dependsOnMethods = "invokeWithTamperedAPIKey")
     public void invokeAPIKeyInQueryParamSuccessTest() throws Exception {
         Map<String, String> headers = new HashMap<>();
-        HttpResponse response = HttpClientRequest.doGet(Utils.getServiceURLHttps(endPoint + "?api_key=" + apiKey), headers);
+        HttpResponse response = HttpClientRequest.doGet(
+                Utils.getServiceURLHttps(endPoint + "?api_key=" + apiKey), headers);
 
         Assert.assertNotNull(response);
-        Assert.assertEquals(response.getResponseCode(), com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK, "Response code mismatched");
+        Assert.assertEquals(response.getResponseCode(),
+                com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus.SC_OK,
+                "Response code mismatched");
     }
 
     @Test(description = "Test to check the API key auth validate invalid signature key")
