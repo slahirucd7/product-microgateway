@@ -39,7 +39,6 @@ public class APIConfig {
     private EndpointSecurity endpointSecurity;
     private String organizationId;
     private String uuid;
-    private String apiKeyHeader;
 
     private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
@@ -83,7 +82,6 @@ public class APIConfig {
         private EndpointSecurity endpointSecurity;
         private String organizationId;
         private String uuid;
-        private String apiKeyHeader;
 
         private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
@@ -187,7 +185,6 @@ public class APIConfig {
             apiConfig.disableSecurity = this.disableSecurity;
             apiConfig.organizationId = this.organizationId;
             apiConfig.uuid = this.uuid;
-            apiConfig.apiKeyHeader = this.apiKeyHeader;
             return apiConfig;
         }
     }
@@ -217,10 +214,6 @@ public class APIConfig {
 
     public String getAuthHeader() {
         return authorizationHeader;
-    }
-
-    public String getApiKeyHeader() {
-        return apiKeyHeader;
     }
 
     public String getApiLifeCycleState() {

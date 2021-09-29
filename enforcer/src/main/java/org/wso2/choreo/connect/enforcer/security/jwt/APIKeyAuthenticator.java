@@ -129,7 +129,7 @@ public class APIKeyAuthenticator extends APIKeyHandler {
                     log.debug("API Key signature is verified.");
 
                     if (jwtTokenPayloadInfo == null) {
-                        log.debug("InternalKey payload not found in the cache.");
+                        log.debug("API Key payload not found in the cache.");
 
                         jwtTokenPayloadInfo = new JWTTokenPayloadInfo();
                         jwtTokenPayloadInfo.setPayload(payload);
