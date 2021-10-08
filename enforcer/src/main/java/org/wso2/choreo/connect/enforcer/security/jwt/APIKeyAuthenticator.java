@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.common.gateway.exception.JWTGeneratorException;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.choreo.connect.discovery.api.SecurityInfo;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
+import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.common.CacheProvider;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -79,11 +80,15 @@ public class APIKeyAuthenticator extends APIKeyHandler {
     // Gets API key from request
     private String getAPIKeyFromRequest(RequestContext requestContext) {
         String apiKey;
+        APIConfig apiConfig = requestContext.getMatchedAPI().getAPIConfig();
         Map<String, String> headers = requestContext.getHeaders();
         apiKey = headers.get(FilterUtils.getAPIKeyHeaderName(requestContext));
         if (StringUtils.isEmpty(apiKey)) {
             Map<String, String> queryParameters = requestContext.getQueryParameters();
             apiKey = queryParameters.get(FilterUtils.getAPIKeyHeaderName(requestContext));
+            if (StringUtils.isEmpty(apiKey) && queryParameters.containsKey(apiConfig.getApiKeyHeaderName())) {
+                apiKey = queryParameters.get(apiConfig.getApiKeyHeaderName());
+            }
         }
         return apiKey;
     }

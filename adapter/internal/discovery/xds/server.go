@@ -22,11 +22,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 	"math/rand"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/wso2/product-microgateway/adapter/internal/notifier"
 
 	"github.com/wso2/product-microgateway/adapter/internal/svcdiscovery"
 	subscription "github.com/wso2/product-microgateway/adapter/pkg/discovery/api/wso2/discovery/subscription"
@@ -44,6 +45,7 @@ import (
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	oasParser "github.com/wso2/product-microgateway/adapter/internal/oasparser"
 	envoyconf "github.com/wso2/product-microgateway/adapter/internal/oasparser/envoyconf"
+	"github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	mgw "github.com/wso2/product-microgateway/adapter/internal/oasparser/model"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/operator"
 	eventhubTypes "github.com/wso2/product-microgateway/adapter/pkg/eventhub/types"
@@ -243,6 +245,7 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 	var organizationID = apiContent.OrganizationID
 	var deployedRevision *notifier.DeployedAPIRevision
 	var err error
+	var schemes []model.SecurityScheme
 
 	if len(apiContent.Environments) == 0 {
 		apiContent.Environments = []string{config.DefaultGatewayName}
@@ -257,7 +260,13 @@ func UpdateAPI(apiContent config.APIContent) (*notifier.DeployedAPIRevision, err
 		mgwSwagger.SetID(apiContent.UUID)
 		mgwSwagger.SetName(apiContent.Name)
 		mgwSwagger.SetVersion(apiContent.Version)
-		mgwSwagger.SetSecurityScheme(apiContent.SecurityScheme)
+		//set swagger file configs not available
+		if(mgwSwagger.GetSecurityScheme() == nil) {
+			for _, value := range apiContent.SecurityScheme {
+				schemes = append(schemes, model.SecurityScheme{Type: value})
+			}
+			mgwSwagger.SetSecurityScheme(schemes)
+		}
 		mgwSwagger.SetXWso2AuthHeader(apiContent.AuthHeader)
 		mgwSwagger.OrganizationID = organizationID
 	} else if apiContent.APIType == mgw.WS {

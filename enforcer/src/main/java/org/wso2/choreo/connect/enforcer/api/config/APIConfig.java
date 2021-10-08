@@ -39,6 +39,7 @@ public class APIConfig {
     private EndpointSecurity endpointSecurity;
     private String organizationId;
     private String uuid;
+    private String apiKeyHeaderName;
 
     private List<String> securitySchemes = new ArrayList<>();
     private String tier = ThrottleConstants.UNLIMITED_TIER;
@@ -65,6 +66,10 @@ public class APIConfig {
         return uuid;
     }
 
+    public String getApiKeyHeaderName() {
+        return apiKeyHeaderName;
+    }
+
     /**
      * Implements builder pattern to build an API Config object.
      */
@@ -82,6 +87,7 @@ public class APIConfig {
         private EndpointSecurity endpointSecurity;
         private String organizationId;
         private String uuid;
+        private String apiKeyHeaderName;
 
         private List<String> securitySchemes = new ArrayList<>();
         private String tier = ThrottleConstants.UNLIMITED_TIER;
@@ -167,6 +173,11 @@ public class APIConfig {
             return this;
         }
 
+        public Builder apiKeyHeader(String apiKeyHeaderName) {
+            this.apiKeyHeaderName = apiKeyHeaderName;
+            return this;
+        }
+
         public APIConfig build() {
             APIConfig apiConfig = new APIConfig();
             apiConfig.name = this.name;
@@ -185,6 +196,7 @@ public class APIConfig {
             apiConfig.disableSecurity = this.disableSecurity;
             apiConfig.organizationId = this.organizationId;
             apiConfig.uuid = this.uuid;
+            apiConfig.apiKeyHeaderName = this.apiKeyHeaderName;
             return apiConfig;
         }
     }

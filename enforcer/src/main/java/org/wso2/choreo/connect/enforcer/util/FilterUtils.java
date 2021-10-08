@@ -36,6 +36,7 @@ import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
 import org.wso2.choreo.connect.enforcer.api.RequestContext;
+import org.wso2.choreo.connect.enforcer.api.config.APIConfig;
 import org.wso2.choreo.connect.enforcer.config.ConfigHolder;
 import org.wso2.choreo.connect.enforcer.config.dto.AuthHeaderDto;
 import org.wso2.choreo.connect.enforcer.constants.APIConstants;
@@ -529,7 +530,12 @@ public class FilterUtils {
     }
 
     public static String getAPIKeyHeaderName(RequestContext requestContext) {
+        APIConfig apiConfig = requestContext.getMatchedAPI().getAPIConfig();
+        Map<String, String> headerMap = requestContext.getHeaders();
         String apiKeyHeader = "";
+        if (headerMap.containsKey(apiConfig.getApiKeyHeaderName())) {
+            return apiConfig.getApiKeyHeaderName();
+        }
         if (StringUtils.isEmpty(apiKeyHeader)) {
             apiKeyHeader = APIConstants.API_SECURITY_API_KEY;
         }
