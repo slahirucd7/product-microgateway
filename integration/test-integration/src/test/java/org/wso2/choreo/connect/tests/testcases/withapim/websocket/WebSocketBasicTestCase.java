@@ -60,7 +60,7 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
     public void testConnectionWithPing() throws Exception {
         WsClient wsClient = new WsClient(endpointURL, requestHeaders);
         List<String> messagesToSend = List.of(new String[]{"ping", "close"});
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend, 0);
         Assert.assertEquals(responses.size(), 1);
         Assert.assertEquals(responses.get(0), "pong");
     }
@@ -73,7 +73,7 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
         messagesToSend.add(msg);
         messagesToSend.add(msg);
         messagesToSend.add("close");
-        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend);
+        List<String> responses = wsClient.retryConnectUntilDeployed(messagesToSend, 0);
         Assert.assertEquals(responses.size(), 2);
         Assert.assertEquals(responses.get(0), "Message received: " + msg);
     }
@@ -84,13 +84,21 @@ public class WebSocketBasicTestCase extends ApimBaseTest {
         WsClient wsClient = new WsClient(endpointURL, requestHeaders);
         List<String> messagesToSend = List.of(new String[]{"ping", "close"});
         boolean respondedNotFound = false;
-        try {
-            wsClient.connectAndSendMessages(messagesToSend);
-        } catch (WebSocketClientHandshakeException e) {
-            if (404 == e.response().status().code()) {
-                respondedNotFound = true;
+        int serverResponse = 0;
+        int maxRetryCount = 10;
+        int retryCount = 0;
+        do {
+            retryCount ++;
+            try {
+                wsClient.connectAndSendMessages(messagesToSend, 0);
+            } catch (WebSocketClientHandshakeException e) {
+                serverResponse = e.response().status().code();
+                if (404 == e.response().status().code()) {
+                    respondedNotFound = true;
+                }
             }
-        }
-        Assert.assertTrue(respondedNotFound);
+        } while (maxRetryCount > retryCount && serverResponse == 503);
+
+        Assert.assertTrue(respondedNotFound, "Server responded with " + serverResponse);
     }
 }
