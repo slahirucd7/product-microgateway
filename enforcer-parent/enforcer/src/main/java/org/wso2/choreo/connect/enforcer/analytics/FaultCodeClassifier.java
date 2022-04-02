@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCate
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.enums.FaultSubCategory;
 import org.wso2.choreo.connect.enforcer.constants.APISecurityConstants;
 import org.wso2.choreo.connect.enforcer.constants.AnalyticsConstants;
+import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 
 /**
  * FaultCodeClassifier classifies the fault and returns error code.
@@ -69,13 +70,15 @@ public class FaultCodeClassifier {
                 return FaultSubCategories.Authentication.AUTHENTICATION_FAILURE;
             case APISecurityConstants.API_AUTH_INCORRECT_ACCESS_TOKEN_TYPE:
             case APISecurityConstants.INVALID_SCOPE:
+            case APISecurityConstants.OPA_AUTH_FORBIDDEN:
                 return FaultSubCategories.Authentication.AUTHORIZATION_FAILURE;
-            case APISecurityConstants.API_BLOCKED:
+            case GeneralErrorCodeConstants.API_BLOCKED_CODE:
+            case APISecurityConstants.API_SUBSCRIPTION_BLOCKED:
             case APISecurityConstants.API_AUTH_FORBIDDEN:
             case APISecurityConstants.SUBSCRIPTION_INACTIVE:
                 return FaultSubCategories.Authentication.SUBSCRIPTION_VALIDATION_FAILURE;
             default:
-                return FaultSubCategories.TargetConnectivity.OTHER;
+                return FaultSubCategories.Authentication.OTHER;
         }
     }
 
@@ -123,6 +126,11 @@ public class FaultCodeClassifier {
     }
 
     public boolean isResourceNotFound() {
+        // isResourceNotFound is not used when logEntry is not null, since 404 related events are published based on
+        // logEntries (not based on requestContext)
+        if (logEntry == null) {
+            return false;
+        }
         ResponseFlags responseFlags = logEntry.getCommonProperties().getResponseFlags();
         if (responseFlags == null) {
             return false;

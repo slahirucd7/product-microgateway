@@ -17,6 +17,7 @@
  */
 package org.wso2.choreo.connect.enforcer.websocket;
 
+import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,7 +71,9 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
             // batches and aggregate the frames. In that case if we directly send the frames to traffic manager, the
             // frame count will be wrong. Instead we can decode the buffer into frames and then process them
             // individually for throttling.
-            AnalyticsFilter.getInstance().handleWebsocketFrameRequest(webSocketFrameRequest);
+            if (ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled()) {
+                AnalyticsFilter.getInstance().handleWebsocketFrameRequest(webSocketFrameRequest);
+            }
             List<Framedata> frames = decoder.translateFrame(
                     ByteBuffer.wrap(webSocketFrameRequest.getPayload().toByteArray()));
             frames.forEach((framedata -> {
@@ -78,7 +81,9 @@ public class WebSocketResponseObserver implements StreamObserver<WebSocketFrameR
                 if (framedata.getOpcode() == Opcode.TEXT || framedata.getOpcode() == Opcode.BINARY
                     || framedata.getOpcode() == Opcode.CONTINUOUS) {
                     WebSocketFrameRequest webSocketFrameRequestClone = webSocketFrameRequest.toBuilder()
-                            .setFrameLength(framedata.getPayloadData().remaining()).build();
+                            .setFrameLength(framedata.getPayloadData().remaining())
+                            .setPayload(ByteString.copyFrom(framedata.getPayloadData()))
+                            .build();
                     sendWebSocketFrameResponse(webSocketFrameRequestClone);
                 } else {
                     logger.debug("Websocket frame type not related to throttling: {}", framedata.getOpcode());

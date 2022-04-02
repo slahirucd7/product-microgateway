@@ -1,6 +1,6 @@
       - "5006:5006"
   mockBackend:
-    image: wso2/choreo-connect-mock-backend:1.1.0-alpha3-SNAPSHOT
+    image: wso2/choreo-connect-mock-backend:1.1.0
     command: java -cp "lib/*" org.wso2.choreo.connect.mockbackend.MockServices -tls-enabled -interceptor-svc-enabled
     ports:
       - "2370:2370"
@@ -14,3 +14,5 @@
     command: run --server --addr :8181 --tls-private-key-file /opa-volume/certs/server-key.pem --tls-cert-file /opa-volume/certs/server-cert.pem /opa-volume/policies/sample-policy.rego
     volumes:
       - ./opa-volume:/opa-volume
+    ports:
+      - "8181:8181" # publish to host to do health checks in tests

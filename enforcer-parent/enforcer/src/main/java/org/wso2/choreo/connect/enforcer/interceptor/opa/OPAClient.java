@@ -88,9 +88,9 @@ public class OPAClient {
         String ruleName = policyAttrib.get("rule");
 
         // additionalParameters - we provide this as a Map<String, String> in the interface
-        // TODO: (renuka) policyAttrib should support Map<String, MAP<String, String>>
-        //  and the additionalParameters should come inside this. Since APIM 4.1.0 not supports
-        //  Map<String, MAP<String, String>> in the UI, this is fine for now.
+        // policyAttrib should support Map<String, MAP<String, String>>
+        // and the additionalParameters should come inside this. Since APIM 4.1.0 not supports
+        // Map<String, MAP<String, String>> in the UI, this is fine for now.
         Map<String, String> additionalParameters = new HashMap<>();
         additionalParameters.put(OPAConstants.AdditionalParameters.ADDITIONAL_PROPERTIES,
                 policyAttrib.get("additionalProperties"));
@@ -165,7 +165,7 @@ public class OPAClient {
             }
         } catch (IOException e) {
             log.error("Error calling the OPA server with server endpoint: {}", serverEp,
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104));
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6104), e);
             throw new OPASecurityException(APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
                     APISecurityConstants.OPA_REQUEST_FAILURE, e);
         }

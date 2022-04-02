@@ -21,6 +21,12 @@ paths:
       responses:
         '200':
           description: successful operation
+  /echo-full/unsupported-policy/{id}:
+    post:
+      summary: Unsupported policies should be ignored
+      responses:
+        '200':
+          description: successful operation
   /echo-full/custom-policy/{id}:
     post:
       summary: Custom policies
@@ -41,6 +47,24 @@ paths:
           description: successful operation
     post:
       summary: rewrite based policies appied
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/rewrite-policy-with-capture-groups/shops/{shopId}.xyz/pets/{petId}/orders:
+    get:
+      summary: rewrite based policies appied with capture groups
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/{shopId}/pets/{petId}/orders:
+    get:
+      summary: rewrite based policies appied with capture groups with invalid params
+      responses:
+        '200':
+          description: successful operation
+  /echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/{shopId}/pets/{petId}/orders:
+    get:
+      summary: rewrite based policies appied with capture groups with invalid chars
       responses:
         '200':
           description: successful operation

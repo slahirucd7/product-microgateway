@@ -558,7 +558,7 @@ func DeleteAPIs(vhost, apiName, version string, environments []string, organizat
 		deletedVhosts := make(map[string]struct{})
 		for vh := range vhosts {
 			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, apiNameVersionHashedID)
-			// TODO: (renuka) optimize to update cache only once after updating all maps
+			// Updating cache one API by one API, if one API failed to update cache continue with others.
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
 				logger.LoggerXds.ErrorC(logging.ErrorDetails{
@@ -626,7 +626,7 @@ func DeleteAPIsWithUUID(vhost, uuid string, environments []string, organizationI
 		deletedVhosts := make(map[string]struct{})
 		for vh := range vhosts {
 			apiIdentifier := GenerateIdentifierForAPIWithUUID(vh, uuid)
-			// TODO: (renuka) optimize to update cache only once after updating all maps
+			// Updating cache one API by one API, if one API failed to update cache continue with others.
 			if err := deleteAPI(apiIdentifier, environments, organizationID); err != nil {
 				// Update apiToVhostsMap with already deleted vhosts in the loop
 				logger.LoggerXds.ErrorC(logging.ErrorDetails{
@@ -846,8 +846,23 @@ func GenerateEnvoyResoucesForLabel(label string) ([]types.Resource, []types.Reso
 					})
 					continue
 				}
+				isDefaultVersion := false
+				if enforcerAPISwagger, ok := orgIDAPIMgwSwaggerMap[organizationID][apiKey]; ok {
+					isDefaultVersion = enforcerAPISwagger.IsDefaultVersion
+				} else {
+					// If the mgwSwagger is not found, proceed with other APIs. (Unreachable condition at this point)
+					// If that happens, there is no purpose in processing clusters too.
+					continue
+				}
+				// If it is a default versioned API, the routes are added to the end of the existing array.
+				// Otherwise the routes would be added to the front.
+				// /fooContext/2.0.0/* resource path should be matched prior to the /fooContext/* .
+				if isDefaultVersion {
+					vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
+				} else {
+					vhostToRouteArrayMap[vhost] = append(orgIDOpenAPIRoutesMap[organizationID][apiKey], vhostToRouteArrayMap[vhost]...)
+				}
 				clusterArray = append(clusterArray, orgIDOpenAPIClustersMap[organizationID][apiKey]...)
-				vhostToRouteArrayMap[vhost] = append(vhostToRouteArrayMap[vhost], orgIDOpenAPIRoutesMap[organizationID][apiKey]...)
 				endpointArray = append(endpointArray, orgIDOpenAPIEndpointsMap[organizationID][apiKey]...)
 				enfocerAPI, ok := orgIDOpenAPIEnforcerApisMap[organizationID][apiKey]
 				if ok {

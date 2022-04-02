@@ -20,6 +20,7 @@
 package model
 
 import (
+	"fmt"
 	"regexp"
 	"sort"
 
@@ -27,6 +28,7 @@ import (
 
 	logger "github.com/wso2/product-microgateway/adapter/internal/loggers"
 	"github.com/wso2/product-microgateway/adapter/internal/oasparser/constants"
+	"github.com/wso2/product-microgateway/adapter/pkg/logging"
 )
 
 // Resource represents the object structure holding the information related to the
@@ -95,30 +97,30 @@ func (resource *Resource) GetMethodList() []string {
 func (resource *Resource) GetRewriteResource() (string, bool) {
 	rewritePath := ""
 	rewriteMethod := false
-	pathOrder := 0
 	for _, method := range resource.methods {
 		if len(method.policies.Request) > 0 {
 			for _, policy := range method.policies.Request {
-				if strings.EqualFold(constants.RewritePathTemplate, policy.Action) {
+				if strings.EqualFold(constants.RewritePathAction, policy.Action) {
 					if paramMap, isMap := policy.Parameters.(map[string]interface{}); isMap {
 						if paramValue, found := paramMap[constants.RewritePathResourcePath]; found {
-							if v, orderExists := paramMap[constants.Order]; orderExists {
-								if pathOrder > v.(int) {
-									continue
-								}
-								pathOrder = v.(int)
-							}
 							rewritePath, found = paramValue.(string)
 							if found {
-								rewritePath = "/" + strings.TrimSuffix(strings.TrimPrefix(rewritePath, "/"), "/")
-								if matched, _ := regexp.MatchString("^[a-zA-Z0-9~/_.-]*$", rewritePath); !matched {
-									logger.LoggerOasparser.Error("Rewrite path includes invalid characters")
+								if regexPath, err := getRewriteRegexFromPathTemplate(resource.path, rewritePath); err != nil {
+									logger.LoggerOasparser.ErrorC(logging.ErrorDetails{
+										Message:   fmt.Sprintf("Invalid rewrite path %q: %v", rewritePath, err),
+										Severity:  logging.MINOR,
+										ErrorCode: 2212,
+									})
 									rewritePath = ""
+								} else {
+									rewritePath = regexPath
+									// get the first success rewrite path and ignore other rewrite methods in the same resource path
+									break
 								}
 							}
 						}
 					}
-				} else if strings.EqualFold(constants.RewriteMethodTemplate, policy.Action) {
+				} else if strings.EqualFold(constants.RewriteMethodAction, policy.Action) {
 					rewriteMethod = true
 				}
 			}

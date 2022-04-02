@@ -22,11 +22,13 @@ import com.github.dockerjava.zerodep.shaded.org.apache.hc.core5.http.HttpStatus;
 import com.google.gson.Gson;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
+import org.awaitility.Awaitility;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.choreo.connect.mockbackend.dto.EchoResponse;
+import org.wso2.choreo.connect.tests.context.CCTestException;
 import org.wso2.choreo.connect.tests.util.HttpResponse;
 import org.wso2.choreo.connect.tests.util.HttpsClientRequest;
 import org.wso2.choreo.connect.tests.util.TestConstant;
@@ -35,6 +37,7 @@ import org.wso2.choreo.connect.tests.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class APIPolicyTestCase {
     private String jwtTokenProd;
@@ -45,6 +48,8 @@ public class APIPolicyTestCase {
     @BeforeClass(description = "Get Prod token")
     void start() throws Exception {
         jwtTokenProd = TokenUtil.getJwtForPetstore(TestConstant.KEY_TYPE_PRODUCTION, null, false);
+        Awaitility.await().pollInterval(2, TimeUnit.SECONDS).atMost(2, TimeUnit.MINUTES)
+                .until(APIPolicyTestCase::checkOPAServerHealth);
     }
 
     @BeforeMethod
@@ -66,6 +71,27 @@ public class APIPolicyTestCase {
         Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey2"), "newHeaderVal2",
                 getPolicyFailAssertMessage("Add Header"));
         assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test header based unsupported API Policies")
+    public void testUnsupportedAPIPolicies() throws Exception {
+        headers.put("RemoveThisHeader", "Unnecessary Header");
+        EchoResponse echoResponse = invokeEchoPost("/echo-full/unsupported-policy/123" + queryParams, "Hello World!", headers);
+
+        // check supported policies
+        Assert.assertFalse(echoResponse.getHeaders().containsKey("RemoveThisHeader"),
+                getPolicyFailAssertMessage("Remove Header"));
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey1"), "newHeaderVal1",
+                getPolicyFailAssertMessage("Add Header"));
+        Assert.assertEquals(echoResponse.getHeaders().getFirst("newHeaderKey2"), "newHeaderVal2",
+                getPolicyFailAssertMessage("Add Header"));
+        assertOriginalClientRequestInfo(echoResponse);
+
+        // check unsupported policies
+        Assert.assertFalse(echoResponse.getHeaders().containsKey("newHeaderKeyFromUnsupportedAction"),
+                "Unsupported policy has applied");
+        Assert.assertFalse(echoResponse.getHeaders().containsKey("newHeaderKeyFromUnsupportedParam"),
+                "Unsupported policy has applied");
     }
 
     @Test(description = "Test custom API Policies and Policy Versions")
@@ -104,6 +130,39 @@ public class APIPolicyTestCase {
 
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.POST.name());
         Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test rewrite path API Policy with capture groups")
+    public void testRewritePathAPIPolicyWithCaptureGroups() throws Exception {
+        // HTTP method: GET
+        EchoResponse echoResponse = invokeEchoGet(
+                "/echo-full/rewrite-policy-with-capture-groups/shops/shop1234.xyz/pets/pet890/orders" + queryParams, headers);
+
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/pets/pet890.pets/hello-shops/abcd-shops/shop1234");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test rewrite path API Policy with capture groups with invalid param")
+    public void testRewritePathAPIPolicyWithCaptureGroupsInvalidParam() throws Exception {
+        // HTTP method: GET
+        EchoResponse echoResponse = invokeEchoGet(
+                "/echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/shop1234/pets/pet890/orders" + queryParams, headers);
+
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/rewrite-policy-with-capture-groups-invalid-param/shops/shop1234/pets/pet890/orders");
+        assertOriginalClientRequestInfo(echoResponse);
+    }
+
+    @Test(description = "Test rewrite path API Policy with capture groups with invalid chars")
+    public void testRewritePathAPIPolicyWithCaptureGroupsInvalidChars() throws Exception {
+        // HTTP method: GET
+        EchoResponse echoResponse = invokeEchoGet(
+                "/echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/shop1234/pets/pet890/orders" + queryParams, headers);
+
+        Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/rewrite-policy-with-capture-groups-invalid-chars/shops/shop1234/pets/pet890/orders");
         assertOriginalClientRequestInfo(echoResponse);
     }
 
@@ -162,7 +221,7 @@ public class APIPolicyTestCase {
         Assert.assertEquals(echoResponse.getQuery().get("newQ1"), "newQ1Value",
                 getPolicyFailAssertMessage("Add Query"));
         Assert.assertEquals(echoResponse.getMethod(), HttpMethod.PUT.name());
-        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path-all-policies"); // TODO: (renuka) check rewrite replace path templates
+        Assert.assertEquals(echoResponse.getPath(), "/v2/echo-full/new-path-all-policies");
         Assert.assertEquals(echoResponse.getData(), "Hello World!");
         assertOriginalClientRequestInfo(echoResponse);
     }
@@ -204,5 +263,14 @@ public class APIPolicyTestCase {
 
     private String getPolicyFailAssertMessage(String policyName) {
         return String.format("Gateway has failed to apply %s API policy", policyName);
+    }
+
+    private static Boolean checkOPAServerHealth() {
+        try {
+            HttpResponse response = HttpsClientRequest.doGet("https://localhost:8181/health?bundles");
+            return response.getResponseCode() == HttpStatus.SC_OK;
+        } catch (CCTestException e) {
+            return false;
+        }
     }
 }

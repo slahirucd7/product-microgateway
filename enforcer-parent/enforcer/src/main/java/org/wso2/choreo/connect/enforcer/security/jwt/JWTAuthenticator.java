@@ -218,13 +218,24 @@ public class JWTAuthenticator implements Authenticator {
                                 if (!apiKeyValidationInfoDTO.isAuthorized()) {
                                     if (GeneralErrorCodeConstants.API_BLOCKED_CODE == apiKeyValidationInfoDTO
                                             .getValidationStatus()) {
-                                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_MESSAGE,
-                                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
-                                        requestContext.getProperties().put(APIConstants.MessageFormat.ERROR_DESCRIPTION,
+                                        FilterUtils.setErrorToContext(requestContext,
+                                                GeneralErrorCodeConstants.API_BLOCKED_CODE,
+                                                APIConstants.StatusCodes.SERVICE_UNAVAILABLE.getCode(),
+                                                GeneralErrorCodeConstants.API_BLOCKED_MESSAGE,
                                                 GeneralErrorCodeConstants.API_BLOCKED_DESCRIPTION);
                                         throw new APISecurityException(APIConstants.StatusCodes.SERVICE_UNAVAILABLE
                                                 .getCode(), apiKeyValidationInfoDTO.getValidationStatus(),
                                                 GeneralErrorCodeConstants.API_BLOCKED_MESSAGE);
+                                    } else if (APISecurityConstants.API_SUBSCRIPTION_BLOCKED == apiKeyValidationInfoDTO
+                                            .getValidationStatus()) {
+                                        FilterUtils.setErrorToContext(requestContext,
+                                                APISecurityConstants.API_SUBSCRIPTION_BLOCKED,
+                                                APIConstants.StatusCodes.UNAUTHENTICATED.getCode(),
+                                                APISecurityConstants.API_SUBSCRIPTION_BLOCKED_MESSAGE,
+                                                APISecurityConstants.API_SUBSCRIPTION_BLOCKED_DESCRIPTION);
+                                        throw new APISecurityException(APIConstants.StatusCodes.UNAUTHENTICATED
+                                                .getCode(), apiKeyValidationInfoDTO.getValidationStatus(),
+                                                APISecurityConstants.API_SUBSCRIPTION_BLOCKED_MESSAGE);
                                     }
                                     throw new APISecurityException(APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
                                             apiKeyValidationInfoDTO.getValidationStatus(),
@@ -273,7 +284,7 @@ public class JWTAuthenticator implements Authenticator {
                             getJwtConfigurationDto();
                     if (backendJwtConfig.isEnabled()) {
                         JWTInfoDto jwtInfoDto = FilterUtils.generateJWTInfoDto(null, validationInfo,
-                                        apiKeyValidationInfoDTO, requestContext);
+                                apiKeyValidationInfoDTO, requestContext);
                         endUserToken = BackendJwtUtils.generateAndRetrieveJWTToken(jwtGenerator, jwtTokenIdentifier,
                                 jwtInfoDto, isGatewayTokenCacheEnabled);
                         // Set generated jwt token as a response header

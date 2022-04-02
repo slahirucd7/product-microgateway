@@ -18,6 +18,8 @@
 package org.wso2.choreo.connect.enforcer.interceptor;
 
 import io.grpc.netty.shaded.io.netty.handler.codec.http.HttpMethod;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.choreo.connect.enforcer.commons.Filter;
@@ -33,13 +35,18 @@ import org.wso2.choreo.connect.enforcer.constants.GeneralErrorCodeConstants;
 import org.wso2.choreo.connect.enforcer.interceptor.opa.OPAClient;
 import org.wso2.choreo.connect.enforcer.util.FilterUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Apply mediation policies.
  */
 public class MediationPolicyFilter implements Filter {
     private static final Logger log = LogManager.getLogger(MediationPolicyFilter.class);
+    private static final String X_URI_MAPPING_PROPERTY = "x-uri-mapping";
 
     public MediationPolicyFilter() {
         OPAClient.init();
@@ -61,53 +68,48 @@ public class MediationPolicyFilter implements Filter {
     }
 
     private boolean applyPolicy(RequestContext requestContext, Policy policy) {
-        try {
-            switch (policy.getAction()) {
-                case "SET_HEADER": {
-                    addOrModifyHeader(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "RENAME_HEADER": {
-                    renameHeader(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "REMOVE_HEADER": {
-                    removeHeader(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "ADD_QUERY": {
-                    addOrModifyQuery(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "REMOVE_QUERY": {
-                    removeQuery(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "REWRITE_RESOURCE_PATH": {
-                    removeAllQueries(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "REWRITE_RESOURCE_METHOD": {
-                    modifyMethod(requestContext, policy.getParameters());
-                    return true;
-                }
-                case "OPA": {
-                    return opaAuthValidation(requestContext, policy.getParameters());
-                }
+        switch (policy.getAction()) {
+            case "SET_HEADER": {
+                addOrModifyHeader(requestContext, policy.getParameters());
+                return true;
             }
-        } catch (NullPointerException e) { // TODO: (renuka) policy args should be validated from adapter
-            // to be fixed with https://github.com/wso2/product-microgateway/issues/2692
-            log.error("Operation policy action \"{}\" contains invalid policy argument",
-                    policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6107), e);
-            FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
-                    APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
-                    APIConstants.INTERNAL_SERVER_ERROR_MESSAGE, null);
-            return false;
+            case "RENAME_HEADER": {
+                renameHeader(requestContext, policy.getParameters());
+                return true;
+            }
+            case "REMOVE_HEADER": {
+                removeHeader(requestContext, policy.getParameters());
+                return true;
+            }
+            case "ADD_QUERY": {
+                addOrModifyQuery(requestContext, policy.getParameters());
+                return true;
+            }
+            case "REMOVE_QUERY": {
+                removeQuery(requestContext, policy.getParameters());
+                return true;
+            }
+            case "REWRITE_RESOURCE_PATH": {
+                removeAllQueries(requestContext, policy.getParameters());
+                pathParamToQueryParamTransform(requestContext, policy.getParameters());
+                return true;
+            }
+            case "REWRITE_RESOURCE_METHOD": {
+                modifyMethod(requestContext, policy.getParameters());
+                return true;
+            }
+            case "OPA": {
+                return opaAuthValidation(requestContext, policy.getParameters());
+            }
         }
 
-        // policy action that enforcer not supports. for eg: "CALL_INTERCEPTOR_SERVICE"
-        // TODO: (renuka) check that we can filter policies by enforcer and pass to enforcer
-        return true;
+        // should not reach here, if reached, it is due to a validation error in Adapter
+        log.error("Operation policy action \"{}\" is not supported. Adapter has failed to validate the policy action",
+                policy.getAction(), ErrorDetails.errorLog(LoggingConstants.Severity.MAJOR, 6100));
+        FilterUtils.setErrorToContext(requestContext, GeneralErrorCodeConstants.MEDIATION_POLICY_ERROR_CODE,
+                APIConstants.StatusCodes.INTERNAL_SERVER_ERROR.getCode(),
+                APIConstants.INTERNAL_SERVER_ERROR_MESSAGE, null);
+        return false;
     }
 
     private void addOrModifyHeader(RequestContext requestContext, Map<String, String> policyAttrib) {
@@ -143,6 +145,35 @@ public class MediationPolicyFilter implements Filter {
         requestContext.setRemoveAllQueryParams(removeQuery);
     }
 
+    private void pathParamToQueryParamTransform(RequestContext requestContext, Map<String, String> policyAttrib) {
+        // "x-uri-mapping" property is explicitly added when processing x-uri-mapping extension in async api definition
+        if (policyAttrib.containsKey(X_URI_MAPPING_PROPERTY)) {
+            String uriMappingValue = policyAttrib.get(X_URI_MAPPING_PROPERTY);
+            String[] queryParts = uriMappingValue.split("\\?");
+            String queryParamString = queryParts.length > 1 ? queryParts[1] : "";
+            List<NameValuePair> queryParams = URLEncodedUtils.parse(queryParamString, StandardCharsets.UTF_8);
+            for (NameValuePair param : queryParams) {
+                String singleQueryParamvalue = param.getValue();
+                if (singleQueryParamvalue.contains("{uri.var.")) {
+                    Matcher substituteParamMatcher = Pattern.compile("\\{uri\\.var\\.(.*?)\\}")
+                            .matcher(singleQueryParamvalue);
+                    while (substituteParamMatcher.find()) {
+                        String pathParamId = singleQueryParamvalue
+                                .substring(substituteParamMatcher.start() + 9, substituteParamMatcher.end() - 1)
+                                .trim();
+                        if (requestContext.getPathParameters() != null
+                                && requestContext.getPathParameters().containsKey(pathParamId)) {
+                            requestContext.getQueryParamsToAdd().put(param.getName(),
+                                    requestContext.getPathParameters().get(pathParamId));
+                        }
+                    }
+                } else {
+                    requestContext.getQueryParamsToAdd().put(param.getName(), param.getValue());
+                }
+            }
+        }
+    }
+
     private void addOrModifyQuery(RequestContext requestContext, Map<String, String> policyAttrib) {
         String queryName = policyAttrib.get("queryParamName");
         String queryValue = policyAttrib.get("queryParamValue");
@@ -174,8 +205,8 @@ public class MediationPolicyFilter implements Filter {
             }
             return isValid;
         } catch (OPASecurityException e) {
-            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(), e,
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101));
+            log.error("Error while validating the OPA policy for the request: {}", requestContext.getRequestPath(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101), e);
             FilterUtils.setErrorToContext(requestContext, e);
             return false;
         }

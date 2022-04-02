@@ -110,11 +110,11 @@ type PolicyList []Policy
 
 // Policy holds APIM policies
 type Policy struct {
-	PolicyName    string      `json:"policyName,omitempty"`
-	PolicyVersion string      `json:"policyVersion,omitempty"`
-	Action        string      `json:"-"`
-	Order         int         `json:"order,omitempty"`
-	Parameters    interface{} `json:"parameters,omitempty"`
+	PolicyName       string      `json:"policyName,omitempty"`
+	PolicyVersion    string      `json:"policyVersion,omitempty"`
+	Action           string      `json:"-"` // This is a meta value used in CC, not included in API YAML
+	IsPassToEnforcer bool        `json:"-"` // This is a meta value used in CC, not included in API YAML
+	Parameters       interface{} `json:"parameters,omitempty"`
 }
 
 // GetFullName returns the fully qualified name of the policy
@@ -257,7 +257,7 @@ func (apiYaml APIYaml) ValidateAPIType() (err error) {
 		// If no api.yaml file is included in the zip folder, return with error.
 		err = errors.New("could not find api.yaml or api.json")
 		return err
-	} else if apiType != constants.HTTP && apiType != constants.WS && apiType != constants.WEBHOOK && apiType == constants.SSE {
+	} else if apiType != constants.HTTP && apiType != constants.WS {
 		errMsg := "The given API type is currently not supported in Choreo Connect. API type: " + apiType
 		err = errors.New(errMsg)
 		return err

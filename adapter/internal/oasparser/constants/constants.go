@@ -45,6 +45,7 @@ const (
 	XMediationScript                  string = "x-mediation-script"
 	XScopes                           string = "x-scopes"
 	XWso2PassRequestPayloadToEnforcer string = "x-wso2-pass-request-payload-to-enforcer"
+	XUriMapping                       string = "x-uri-mapping"
 )
 
 // cluster name prefixes
@@ -86,13 +87,13 @@ const (
 
 // operational policy field names
 const (
-	RewriteMethodTemplate      string = "REWRITE_RESOURCE_METHOD"
-	InterceptorServiceTemplate string = "CALL_INTERCEPTOR_SERVICE"
-	RewritePathTemplate        string = "REWRITE_RESOURCE_PATH"
+	RewriteMethodAction        string = "REWRITE_RESOURCE_METHOD"
+	InterceptorServiceAction   string = "CALL_INTERCEPTOR_SERVICE"
+	RewritePathAction          string = "REWRITE_RESOURCE_PATH"
 	RewritePathResourcePath    string = "resourcePath"
 	InterceptorServiceURL      string = "interceptorServiceURL"
 	InterceptorServiceIncludes string = "includes"
-	Order                      string = "order"
+	IncludeQueryParams         string = "includeQueryParams"
 )
 
 // Constants that occur as values in api.yaml
