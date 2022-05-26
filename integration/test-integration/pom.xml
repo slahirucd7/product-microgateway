@@ -44,8 +44,9 @@
                         <sun.net.http.allowRestrictedHeaders>true</sun.net.http.allowRestrictedHeaders>
                     </systemPropertyVariables>
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>
-                        <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>
+<!--                        <suiteXmlFile>src/test/resources/testng-cc-standalone.xml</suiteXmlFile>-->
+<!--                        <suiteXmlFile>src/test/resources/testng-cc-with-apim.xml</suiteXmlFile>-->
+                        <suiteXmlFile>src/test/resources/testng-cc-with-latest-apim.xml</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemProperties>
                         <property>

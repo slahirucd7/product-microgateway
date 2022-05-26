@@ -105,8 +105,15 @@ public class ApimInstance {
 
         //Both files are directly given here to avoid ApimInstance being configurable.
         //This is to encourage starting API Manager only once for the complete test suite.
-        String dockerComposeSource = testResourcesDir + TestConstant.TEST_DOCKER_COMPOSE_DIR
-                + File.separator + "apim-in-common-network-docker-compose.yaml";
+        String dockerComposeSource = null;
+        //Assigns latest support apim image to run tests
+        if(apimImageName.equalsIgnoreCase("latestApimFromSupport")) {
+            dockerComposeSource = testResourcesDir + TestConstant.TEST_DOCKER_COMPOSE_DIR
+                    + File.separator + "latest-apim-in-common-network-docker-compose.yaml";
+        } else {
+            dockerComposeSource = testResourcesDir + TestConstant.TEST_DOCKER_COMPOSE_DIR
+                    + File.separator + "apim-in-common-network-docker-compose.yaml";
+        }
         String dockerComposeDest = apimSetupDir + TestConstant.DOCKER_COMPOSE_YAML_PATH;
 
         String deploymentTomlSource = testResourcesDir + TestConstant.CONFIGS_DIR
