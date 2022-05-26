@@ -47,8 +47,8 @@ public class ApimInstance {
      *
      * @throws CCTestException if something goes wrong while copying server configs
      */
-    private ApimInstance() throws CCTestException {
-        String dockerComposePath = createApimSetup();
+    private ApimInstance(String apimImageName) throws CCTestException {
+        String dockerComposePath = createApimSetup(apimImageName);
         Logger apimLogger = LoggerFactory.getLogger("APIM");
         Slf4jLogConsumer apimLogConsumer = new Slf4jLogConsumer(apimLogger);
         environment = new DockerComposeContainer(new File(dockerComposePath))
@@ -56,8 +56,8 @@ public class ApimInstance {
                 .withLogConsumer("apim", apimLogConsumer);
     }
 
-    public static ApimInstance createNewInstance() throws CCTestException {
-        instance = new ApimInstance();
+    public static ApimInstance createNewInstance(String apimImageName) throws CCTestException {
+        instance = new ApimInstance(apimImageName);
         return instance;
     }
 
@@ -98,15 +98,22 @@ public class ApimInstance {
         environment.stop();
     }
 
-    private String createApimSetup() throws CCTestException {
+    private String createApimSetup(String apimImageName) throws CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String testResourcesDir = targetDir + TestConstant.TEST_RESOURCES_PATH;
         String apimSetupDir = targetDir + File.separator + "apim";
 
         //Both files are directly given here to avoid ApimInstance being configurable.
         //This is to encourage starting API Manager only once for the complete test suite.
-        String dockerComposeSource = testResourcesDir + TestConstant.TEST_DOCKER_COMPOSE_DIR
-                + File.separator + "apim-in-common-network-docker-compose.yaml";
+        String dockerComposeSource = null;
+        //Assigns latest support apim image to run tests
+        if(apimImageName.equalsIgnoreCase("latestApimFromSupport")) {
+            dockerComposeSource = testResourcesDir + TestConstant.TEST_DOCKER_COMPOSE_DIR
+                    + File.separator + "latest-apim-in-common-network-docker-compose.yaml";
+        } else {
+            dockerComposeSource = testResourcesDir + TestConstant.TEST_DOCKER_COMPOSE_DIR
+                    + File.separator + "apim-in-common-network-docker-compose.yaml";
+        }
         String dockerComposeDest = apimSetupDir + TestConstant.DOCKER_COMPOSE_YAML_PATH;
 
         String deploymentTomlSource = testResourcesDir + TestConstant.CONFIGS_DIR
