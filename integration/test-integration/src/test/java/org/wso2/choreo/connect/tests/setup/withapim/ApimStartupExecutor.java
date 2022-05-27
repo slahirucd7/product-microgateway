@@ -19,8 +19,6 @@
 package org.wso2.choreo.connect.tests.setup.withapim;
 
 import org.awaitility.Awaitility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
@@ -34,12 +32,9 @@ import java.util.concurrent.TimeUnit;
 public class ApimStartupExecutor {
     ApimInstance apimInstance;
 
-    private static final Logger log = LoggerFactory.getLogger(ApimStartupExecutor.class);
-
     @Parameters({"apimImageName"})
     @BeforeSuite(description = "start API Manager")
     void startAPIM(@Optional("apimImageName") String apimImageName) throws Exception {
-        log.info("apimImageName >>>>> " + apimImageName);
         apimInstance = ApimInstance.createNewInstance(apimImageName);
         apimInstance.startAPIM();
         Awaitility.await().pollDelay(2, TimeUnit.MINUTES).pollInterval(15, TimeUnit.SECONDS)
