@@ -39,6 +39,24 @@
     </properties>
     <build>
         <plugins>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <executions>
+                    <execution>
+                        <id>latest-apim-test-suit-creation</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>
+                                integration/test-integration/src/test/resources/scripts/test-suit-creator-for-latest-apim.sh
+                            </executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- added dependency scan plugin here to skip scanning dependencies used for tests -->
             <plugin>
                 <groupId>org.owasp</groupId>
