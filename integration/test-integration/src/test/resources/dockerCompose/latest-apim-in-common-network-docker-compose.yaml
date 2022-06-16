@@ -4,7 +4,7 @@ networks:
     name: apim_and_cc
 services:
   apim:
-    image: docker.wso2.com/wso2am:4.0.0.0
+    image: docker.wso2.com/wso2am:4.1.0.0
     user: root
     ports:
       - "9764:9764"

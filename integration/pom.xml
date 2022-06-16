@@ -58,7 +58,7 @@
                         </goals>
                         <configuration>
                             <executable>
-                                integration/test-integration/src/test/resources/scripts/test-suit-creator-for-latest-apim.sh
+                                ${baseDir}/integration/test-integration/src/test/resources/scripts/test-suit-creator-for-latest-apim.sh
                             </executable>
                         </configuration>
                     </execution>

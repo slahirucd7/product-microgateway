@@ -47,8 +47,8 @@ public class ApimInstance {
      *
      * @throws CCTestException if something goes wrong while copying server configs
      */
-    private ApimInstance() throws CCTestException {
-        String dockerComposePath = createApimSetup();
+    private ApimInstance(String apimImageName) throws CCTestException {
+        String dockerComposePath = createApimSetup(apimImageName);
         Logger apimLogger = LoggerFactory.getLogger("APIM");
         Slf4jLogConsumer apimLogConsumer = new Slf4jLogConsumer(apimLogger);
         environment = new DockerComposeContainer(new File(dockerComposePath))
@@ -56,8 +56,8 @@ public class ApimInstance {
                 .withLogConsumer("apim", apimLogConsumer);
     }
 
-    public static ApimInstance createNewInstance() throws CCTestException {
-        instance = new ApimInstance();
+    public static ApimInstance createNewInstance(String apimImageName) throws CCTestException {
+        instance = new ApimInstance(apimImageName);
         return instance;
     }
 
@@ -98,7 +98,7 @@ public class ApimInstance {
         environment.stop();
     }
 
-    private String createApimSetup() throws CCTestException {
+    private String createApimSetup(String apimImageName) throws CCTestException {
         String targetDir = Utils.getTargetDirPath();
         String testResourcesDir = targetDir + TestConstant.TEST_RESOURCES_PATH;
         String apimSetupDir = targetDir + File.separator + "apim";
