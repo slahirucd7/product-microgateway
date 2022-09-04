@@ -65,3 +65,6 @@ jobs:
         run: |
           ./build-ubuntu-multi-platform-images.sh all
           docker images
+
+
+
