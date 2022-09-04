@@ -51,7 +51,14 @@ jobs:
           export GOFLAGS=-mod=mod
           mvn clean install -PRelease -s .maven/settings.xml \
             -pl '!:integration' -pl '!:mock-backend-server' -pl '!:test-integration'
+      - name: Print working directory
+        run: |
+          pwd
+      - name: Upload coverage reports to Codecov with GitHub Action
+        working-directory: ./adapter/target
+        uses: codecov/codecov-action@v3
       - name: Run integration tests
+        working-directory: ../../
         run: |
           mvn clean install -PRelease -pl ':integration' -amd -s .maven/settings.xml
       - name: Build multi platform Ubuntu images
