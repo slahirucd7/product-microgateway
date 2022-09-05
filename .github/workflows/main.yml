@@ -54,8 +54,10 @@ jobs:
       - name: Print working directory
         run: |
           pwd
+      - name: Change working directory
+        run: |
+          cd  ./adapter/target
       - name: Upload coverage reports to Codecov with GitHub Action
-        working-directory: ./adapter/target
         uses: codecov/codecov-action@v3
       - name: Run integration tests
         working-directory: ../../
