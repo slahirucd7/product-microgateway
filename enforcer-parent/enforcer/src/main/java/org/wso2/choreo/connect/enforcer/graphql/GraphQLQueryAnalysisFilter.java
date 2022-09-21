@@ -39,6 +39,7 @@ public class GraphQLQueryAnalysisFilter implements Filter {
 
     private static final Logger logger = LogManager.getLogger(GraphQLQueryAnalysisFilter.class);
     private QueryMutationAnalyzer queryMutationAnalyzer;
+    int testIntValue = 10;
 
     @Override
     public void init(APIConfig apiConfig, Map<String, String> configProperties) {
