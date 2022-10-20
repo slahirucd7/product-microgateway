@@ -198,8 +198,7 @@ public class CcInstance extends ChoreoConnectImpl {
             instance = new CcInstance(this.dockerComposeFile, this.confFileName, this.backendServiceFile,
                     this.gitServiceFile, this.withCustomJwtTransformer, this.withAnalyticsMetricImpl,
                     this.startupAPIProjectFiles, this.isInterceptorCertRequired, this.enforcerTrustCertsDir,
-                    this.volumeMountDir, this.isClientCertValidationRequired, this.isInitialStartUp
-            );
+                    this.volumeMountDir, this.isClientCertValidationRequired, this.isInitialStartUp);
             return instance;
         }
     }
