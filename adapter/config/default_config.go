@@ -148,17 +148,17 @@ var defaultConfig = &Config{
 		},
 		Filters: filters{
 			Compression: compression{
-				Enabled: false,
+				Enabled: true,
 				Library: "gzip",
 				RequestDirection: requestDirection{
 					Enabled:              false,
 					MinimumContentLength: 30,
-					ContentType:          []string{"text/html", "application/json"},
+					ContentType:          []string{"application/javascript", "application/json", "application/xhtml+xml", "image/svg+xml", "text/css", "text/html", "text/plain", "text/xml"},
 				},
 				ResponseDirection: responseDirection{
 					Enabled:              true,
 					MinimumContentLength: 30,
-					ContentType:          []string{"text/html", "application/json"},
+					ContentType:          []string{"application/javascript", "application/json", "application/xhtml+xml", "image/svg+xml", "text/css", "text/html", "text/plain", "text/xml"},
 					EnableForEtagHeader:  true,
 				},
 				LibraryProperties: map[string]interface{}{
