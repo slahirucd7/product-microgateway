@@ -181,8 +181,7 @@ public class MediationPolicyFilter implements Filter {
         try {
             boolean isValid = OPAClient.getInstance().validateRequest(requestContext, policyAttrib);
             if (!isValid) {
-                log.error("OPA validation failed for the request: {} {}",
-                        requestContext.getRequestPathTemplate(),
+                log.error("OPA validation failed for the request: " + requestContext.getRequestPath(),
                         ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101));
                 FilterUtils.setErrorToContext(requestContext, APISecurityConstants.OPA_AUTH_FORBIDDEN,
                         APIConstants.StatusCodes.UNAUTHORIZED.getCode(),
@@ -191,8 +190,8 @@ public class MediationPolicyFilter implements Filter {
             return isValid;
         } catch (OPASecurityException e) {
             log.error("Error while validating the OPA policy for the request: {} {} {}",
-                    requestContext.getRequestPathTemplate(),
-                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101), e.getMessage());
+                    requestContext.getRequestPath(),
+                    ErrorDetails.errorLog(LoggingConstants.Severity.MINOR, 6101), e);
             FilterUtils.setErrorToContext(requestContext, e);
             return false;
         }

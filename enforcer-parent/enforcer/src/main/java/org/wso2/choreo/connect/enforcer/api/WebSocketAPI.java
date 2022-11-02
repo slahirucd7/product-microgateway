@@ -154,7 +154,6 @@ public class WebSocketAPI implements API {
         ResponseObject responseObject = new ResponseObject();
         responseObject.setRequestPath(requestContext.getRequestPath());
         boolean analyticsEnabled = ConfigHolder.getInstance().getConfig().getAnalyticsConfig().isEnabled();
-        Utils.removeCommonAuthHeaders(requestContext);
         if (executeFilterChain(requestContext)) {
             if (analyticsEnabled) {
                 AnalyticsFilter.getInstance().handleSuccessRequest(requestContext);
