@@ -304,6 +304,9 @@ func UpdateAPI(vHost string, apiProject mgw.ProjectAPI, environments []string) (
 		logger.LoggerXds.Error("API type not currently supported by Choreo Connect")
 	}
 	mgwSwagger.SetEnvLabelProperties(apiEnvProps)
+	if apiYaml.RateLimitLevel != "" {
+		mgwSwagger.SetRateLimitPoliciesForOperations(apiYaml.Operations)
+	}
 	mgwSwagger.SetID(apiYaml.ID)
 	mgwSwagger.SetName(apiYaml.Name)
 	mgwSwagger.SetVersion(apiYaml.Version)
