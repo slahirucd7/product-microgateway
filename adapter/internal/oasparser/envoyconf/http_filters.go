@@ -62,7 +62,7 @@ func getHTTPFilters() []*hcmv3.HttpFilter {
 		router,
 	}
 	conf, _ := config.ReadConfigs()
-	if conf.Envoy.RateLimit.Enable {
+	if conf.Envoy.RateLimit.Enabled {
 		rateLimit := getRateLimitFilter()
 		httpFilters = httpFilters[:len(httpFilters)-1]
 		httpFilters = append(httpFilters, rateLimit)
