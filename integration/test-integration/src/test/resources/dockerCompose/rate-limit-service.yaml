@@ -26,7 +26,7 @@
       - ../../rateLimit/config:/data/ratelimit/config
     environment:
       - USE_STATSD=false
-      - LOG_LEVEL=info
+      - LOG_LEVEL=debug
       - REDIS_SOCKET_TYPE=tcp
       - REDIS_URL=redis:6379
       - RUNTIME_ROOT=/data
