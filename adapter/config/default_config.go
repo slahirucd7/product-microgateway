@@ -122,7 +122,7 @@ var defaultConfig = &Config{
 		},
 		RateLimit: rateLimit{
 			Enabled: false,
-			Hostname: "host.docker.internal",
+			Hostname: "ratelimit-service",
 			Port: 8083,
 		},
 	},

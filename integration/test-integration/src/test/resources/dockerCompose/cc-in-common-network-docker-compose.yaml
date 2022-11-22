@@ -34,6 +34,14 @@ services:
       - "9090:9090"
     networks:
       - cc_internal
+    deploy:
+      resources:
+        reservations:
+          memory: "500Mi"
+          cpus: "1000m"
+        limits:
+          memory: "500Mi"
+          cpus: "1000m"
   adapter:
     image: wso2/choreo-connect-adapter:1.1.0-m1-SNAPSHOT
     logging:
@@ -57,6 +65,14 @@ services:
     networks:
       - cc_internal
       - apim_and_cc
+    deploy:
+      resources:
+        reservations:
+          memory: "500Mi"
+          cpus: "500m"
+        limits:
+          memory: "500Mi"
+          cpus: "500m"
   enforcer:
     image: wso2/choreo-connect-enforcer:1.1.0-m1-SNAPSHOT
     logging:
@@ -87,6 +103,14 @@ services:
     networks:
       - cc_internal
       - apim_and_cc
+    deploy:
+      resources:
+        reservations:
+          memory: "1000Mi"
+          cpus: "1000m"
+        limits:
+          memory: "1000Mi"
+          cpus: "1000m"
     ports:
       - "8081:8081"
       - "9001:9001"
