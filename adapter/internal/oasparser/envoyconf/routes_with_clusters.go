@@ -899,6 +899,9 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 			},
 		}
 		if config.Envoy.RateLimit.Enabled && params.rateLimitLevel != "" {
+			if rlMethodDescriptorValue == OperationLevelRateLimit {
+				basePath += resourcePathParam
+			}
 			rateLimit := routev3.RateLimit{
 				Actions: []*routev3.RateLimit_Action{
 					{
@@ -921,10 +924,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 							GenericKey: &routev3.RateLimit_Action_GenericKey{
 								DescriptorKey:   "path",
-								DescriptorValue: params.xWSO2BasePath,
+								DescriptorValue: basePath,
 							},
 						},
 					},
+				},
+			}
+			if params.rateLimitLevel != OperationLevelRateLimit {
+				apiLevelRateLimitActions := []*routev3.RateLimit_Action{
 					{
 						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
 							GenericKey: &routev3.RateLimit_Action_GenericKey{
@@ -933,16 +940,30 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 							},
 						},
 					},
+				}
+				rateLimit.Actions = append(rateLimit.Actions, apiLevelRateLimitActions...)
+			} else {
+				operationLevelRateLimitActions := []*routev3.RateLimit_Action{
 					{
-						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
-							GenericKey: &routev3.RateLimit_Action_GenericKey{
-								DescriptorKey:   "policy",
-								DescriptorValue: rateLimitPolicyName,
+						ActionSpecifier: &routev3.RateLimit_Action_RequestHeaders_{
+							RequestHeaders: &routev3.RateLimit_Action_RequestHeaders{
+								DescriptorKey: "method",
+								HeaderName:    ":method",
 							},
 						},
 					},
-				},
+				}
+				rateLimit.Actions = append(rateLimit.Actions, operationLevelRateLimitActions...)
 			}
+			// assigns the ratelimit policy
+			rateLimit.Actions = append(rateLimit.Actions, &routev3.RateLimit_Action{
+				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+					GenericKey: &routev3.RateLimit_Action_GenericKey{
+						DescriptorKey:   "policy",
+						DescriptorValue: rateLimitPolicyName,
+					},
+				},
+			})
 			action.Route.RateLimits = []*routev3.RateLimit{&rateLimit}
 		}
 	} else {
@@ -1387,6 +1408,11 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		for _, operation := range resource.GetMethod() {
 			rateLimitPolicyName = operation.RateLimitPolicy
 			break
+		}
+	} else if swagger.RateLimitLevel == OperationLevelRateLimit {
+		for _, operation := range resource.GetMethod() {
+			rateLimitPolicyName = operation.RateLimitPolicy
+			rlMethodDescriptorValue = OperationLevelRateLimit
 		}
 	}
 	params := &routeCreateParams{
