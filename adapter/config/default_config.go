@@ -125,6 +125,7 @@ var defaultConfig = &Config{
 			Enabled:  false,
 			Hostname: "ratelimit-service",
 			Port:     8083,
+			FailureModeDeny: false,
 			RatelimitRequestTimeouts: ratelimitRequestTimeouts{
 				RequestTimeoutInNanoSeconds: 80000000,
 				RequestTimeoutInSeconds:     0,

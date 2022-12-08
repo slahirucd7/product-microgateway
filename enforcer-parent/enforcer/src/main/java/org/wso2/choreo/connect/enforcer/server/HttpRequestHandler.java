@@ -84,6 +84,6 @@ public class HttpRequestHandler implements RequestHandler<CheckRequest, Response
         return new RequestContext.Builder(requestPath).matchedResourceConfig(resourceConfig).requestMethod(method)
                 .matchedAPI(api.getAPIConfig()).headers(headers).requestID(requestID).address(address)
                 .prodClusterHeader(prodCluster).sandClusterHeader(sandCluster).requestTimeStamp(requestTimeInMillis)
-                .pathTemplate(pathTemplate).build();
+                .pathTemplate(pathTemplate).rateLimitPolicy(resourceConfig.getRateLimitPolicy()).build();
     }
 }

@@ -130,6 +130,7 @@ type rateLimit struct {
 	Enabled                  bool
 	Hostname                 string
 	Port                     uint32
+	FailureModeDeny          bool
 	RatelimitRequestTimeouts ratelimitRequestTimeouts
 	KeyFilePath              string
 	CertFilePath             string

@@ -179,6 +179,8 @@ sandboxVhost = "sandbox.host"
   hostname = "rate-limiter"
   # Post used for the listening
   port = 8083
+  # Allow to fail requests in case the rate limiting service does not respond back
+  failureModeDeny = false
   # Key file path used for the rate-limit service mTLS
   keyFilePath = "/home/wso2/security/keystore/mg.key"
   # Cert file path used for the rate-limit service mTLS

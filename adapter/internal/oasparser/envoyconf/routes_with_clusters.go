@@ -37,6 +37,7 @@ import (
 	lua "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/lua/v3"
 	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	envoy_type_matcherv3 "github.com/envoyproxy/go-control-plane/envoy/type/matcher/v3"
+	envoy_type_metadata_v3 "github.com/envoyproxy/go-control-plane/envoy/type/metadata/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/wrappers"
@@ -898,7 +899,7 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 				IdleTimeout:       ptypes.DurationProto(time.Duration(config.Envoy.Upstream.Timeouts.RouteIdleTimeoutInSeconds) * time.Second),
 			},
 		}
-		if config.Envoy.RateLimit.Enabled && params.rateLimitLevel != "" {
+		if config.Envoy.RateLimit.Enabled && rlMethodDescriptorValue != "" {
 			if rlMethodDescriptorValue == OperationLevelRateLimit {
 				basePath += resourcePathParam
 			}
@@ -940,6 +941,14 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 							},
 						},
 					},
+					{
+						ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
+							GenericKey: &routev3.RateLimit_Action_GenericKey{
+								DescriptorKey:   "policy",
+								DescriptorValue: rateLimitPolicyName,
+							},
+						},
+					},
 				}
 				rateLimit.Actions = append(rateLimit.Actions, apiLevelRateLimitActions...)
 			} else {
@@ -952,18 +961,27 @@ func createRoute(params *routeCreateParams) *routev3.Route {
 							},
 						},
 					},
+					{
+						ActionSpecifier: &routev3.RateLimit_Action_Metadata{
+							Metadata: &routev3.RateLimit_Action_MetaData{
+								DescriptorKey: "policy",
+								MetadataKey: &envoy_type_metadata_v3.MetadataKey{
+									Key: "envoy.filters.http.ext_authz",
+									Path: []*envoy_type_metadata_v3.MetadataKey_PathSegment{
+										{
+											Segment: &envoy_type_metadata_v3.MetadataKey_PathSegment_Key{
+												Key: "policy",
+											},
+										},
+									},
+								},
+								Source: routev3.RateLimit_Action_MetaData_DYNAMIC,
+							},
+						},
+					},
 				}
 				rateLimit.Actions = append(rateLimit.Actions, operationLevelRateLimitActions...)
 			}
-			// assigns the ratelimit policy
-			rateLimit.Actions = append(rateLimit.Actions, &routev3.RateLimit_Action{
-				ActionSpecifier: &routev3.RateLimit_Action_GenericKey_{
-					GenericKey: &routev3.RateLimit_Action_GenericKey{
-						DescriptorKey:   "policy",
-						DescriptorValue: rateLimitPolicyName,
-					},
-				},
-			})
 			action.Route.RateLimits = []*routev3.RateLimit{&rateLimit}
 		}
 	} else {
@@ -1405,15 +1423,10 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	var rateLimitPolicyName, rlMethodDescriptorValue string
 	if swagger.RateLimitLevel == APILevelRateLimit {
 		rlMethodDescriptorValue = APILevelRateLimitDescriptor
-		for _, operation := range resource.GetMethod() {
-			rateLimitPolicyName = operation.RateLimitPolicy
-			break
-		}
+		rateLimitPolicyName = swagger.RateLimitPolicy
 	} else if swagger.RateLimitLevel == OperationLevelRateLimit {
-		for _, operation := range resource.GetMethod() {
-			rateLimitPolicyName = operation.RateLimitPolicy
-			rlMethodDescriptorValue = OperationLevelRateLimit
-		}
+		rlMethodDescriptorValue = OperationLevelRateLimit
+		rateLimitPolicyName = ""
 	}
 	params := &routeCreateParams{
 		organizationID:      organizationID,
