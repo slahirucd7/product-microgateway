@@ -419,7 +419,7 @@ func (swagger *MgwSwagger) SetRateLimitPoliciesForOperations(apiYamlOperations [
 	if swagger.RateLimitLevel == "API" {
 		for _, resource := range swagger.resources {
 			for _, operation := range resource.methods {
-				operation.RateLimitPolicy = ""
+				operation.RateLimitPolicy = swagger.RateLimitPolicy
 			}
 		}
 	} else {
