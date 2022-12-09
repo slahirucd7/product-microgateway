@@ -1457,13 +1457,11 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 	prodClusterName string, sandClusterName string, requestInterceptor map[string]model.InterceptEndpoint,
 	responseInterceptor map[string]model.InterceptEndpoint, organizationID string) *routeCreateParams {
 
-	var rateLimitPolicyName, rlMethodDescriptorValue string
+	var rlMethodDescriptorValue string
 	if swagger.RateLimitLevel == APILevelRateLimit {
 		rlMethodDescriptorValue = APILevelRateLimitDescriptor
-		rateLimitPolicyName = swagger.RateLimitPolicy
 	} else if swagger.RateLimitLevel == OperationLevelRateLimit {
 		rlMethodDescriptorValue = OperationLevelRateLimit
-		rateLimitPolicyName = ""
 	}
 	params := &routeCreateParams{
 		organizationID:      organizationID,
@@ -1482,7 +1480,6 @@ func genRouteCreateParams(swagger *model.MgwSwagger, resource *model.Resource, v
 		requestInterceptor:  requestInterceptor,
 		responseInterceptor: responseInterceptor,
 		rateLimitLevel:      rlMethodDescriptorValue,
-		rateLimitPolicyName: rateLimitPolicyName,
 	}
 
 	if resource != nil {
