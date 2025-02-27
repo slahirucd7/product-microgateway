@@ -51,11 +51,6 @@ const (
 	RuntimeArtifactEndpoint string = "internal/data/v1/runtime-artifacts"
 	//RetrieveRuntimeArtifactEndpoint represents the RuntimeArtifactEndpoint endpoint with dataplane identifier
 	RetrieveRuntimeArtifactEndpoint string = "internal/data/v1/retrieve-runtime-artifacts"
-<<<<<<< HEAD
-	// httpTimeout is for connection timeout of httpClient in seconds
-	httpTimeout time.Duration = 30
-=======
->>>>>>> 6ec908ae1 (remove unused internal/data/v1/retrieve-api-artifacts API resource)
 )
 
 // FetchAPIs submits the control plane http request to the thread pool. The thread pool would process it and return
